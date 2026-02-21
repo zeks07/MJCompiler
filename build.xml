@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MJCompiler" default="run" basedir=".">
+    <property name="group.id" value="rs.ac.bg.etf.pp1"/>
+    <property name="group.dir" value="rs/ac/bg/etf/pp1"/>
+
+    <property name="src.dir" value="./src"/>
+    <property name="build.dir" value="./build"/>
+    <property name="srd.build.dir" value="${build.dir}/src"/>
+    <property name="lib.dir" value="./lib"/>
+    <property name="spec.dir" value="${src.dir}/spec"/>
+    <property name="gen.dir" value="${src.dir}/gen"/>
+    <property name="test.dir" value="${src.dir}/tests/test"/>
+    <property name="test.build.dir" value="${build.dir}/test"/>
+    <property name="testData.dir" location="${src.dir}/tests/testData"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+        <dirset dir="${srd.build.dir}"/>
+    </path>
+
+    <path id="testClasspath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+        <dirset dir="${srd.build.dir}"/>
+        <dirset dir="${test.build.dir}"/>
+    </path>
+
+    <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${lib.dir}/JFlex.jar"/>
+
+    <target name="run">
+        <java classname="rs.etf.pp1.mj.runtime.Run" classpathref="classpath">
+            <arg value="${testData.dir}/a.mj.obj"/>
+        </java>
+    </target>
+
+    <target name="build" depends="init">
+        <javac srcdir="${src.dir}" destdir="${srd.build.dir}" classpathref="classpath" includeantruntime="false" fork="true"/>
+    </target>
+
+    <target name="runTest" depends="buildTest">
+        <java dir="${test.build.dir}" classname="${group.id}.Tests" classpathref="testClasspath" fork="true">
+            <arg value="${testData.dir}"/>
+        </java>
+    </target>
+
+    <target name="buildTest" depends="initTest, build">
+        <javac srcdir="${test.dir}" destdir="${test.build.dir}" classpathref="classpath" includeantruntime="false" fork="true"/>
+    </target>
+
+    <target name="generate" depends="initGenerate, generateLexer, generateParser"/>
+
+    <target name="generateLexer">
+        <jflex
+            file="${spec.dir}/MJLexer.flex"
+            destdir="${gen.dir}"
+        />
+    </target>
+
+    <target name="generateParser">
+        <java jar="${lib.dir}/cup_v10k.jar" fork="true">
+            <arg value="-destdir"/>
+            <arg value="${gen.dir}/${group.dir}"/>
+            <arg value="-ast"/>
+            <arg value="src.gen.${group.id}.ast"/>
+            <arg value="-parser"/>
+            <arg value="MJParser"/>
+            <arg value="-buildtree"/>
+            <arg value="${spec.dir}/MJParser.cup"/>
+        </java>
+        <replace dir="${gen.dir}/${group.dir}/ast" value="${group.id}.ast" token="src.gen.${group.id}.ast"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${srd.build.dir}"/>
+    </target>
+
+    <target name="initTest" depends="init">
+        <mkdir dir="${test.build.dir}"/>
+    </target>
+
+    <target name="initGenerate" depends="init">
+        <mkdir dir="${gen.dir}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="cleanGenerated">
+        <delete dir="${gen.dir}"/>
+    </target>
+
+</project>

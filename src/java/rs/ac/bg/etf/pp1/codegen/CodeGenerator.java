@@ -1,0 +1,851 @@
+package rs.ac.bg.etf.pp1.codegen;
+
+import rs.ac.bg.etf.pp1.ast.*;
+import rs.ac.bg.etf.pp1.codegen.Items.*;
+import rs.ac.bg.etf.pp1.logger.CompilerLogger;
+import rs.ac.bg.etf.pp1.symbols.BuiltIn;
+import rs.ac.bg.etf.pp1.symbols.Symbol;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
+import rs.ac.bg.etf.pp1.symbols.Type;
+import rs.ac.bg.etf.pp1.util.Context;
+
+import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
+import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
+
+public final class CodeGenerator extends VisitorAdaptor {
+    private final SymbolTable table;
+    private final CompilerLogger logger;
+    private final BytecodeEmitter code;
+    private final Items items;
+
+    private Item result;
+
+    public CodeGenerator(Context context) {
+        this.table = SymbolTable.getInstance(context);
+        this.logger = CompilerLogger.getInstance(context);
+        this.code = BytecodeEmitter.getInstance(context);
+        this.items = new Items(code, table);
+    }
+
+    public void generateProgram(SyntaxNode node) {
+    }
+
+    private void generateMethod(MJMethodBody node) {
+        generateStatement(node);
+    }
+
+    @Override
+    public void visit(MJNullLiteral node) {
+        result = items.makeStackItem(BuiltIn.NULL);
+    }
+
+    @Override
+    public void visit(MJIntegerLiteral node) {
+        result = items.makeImmediateItem(node.getI1());
+    }
+
+    @Override
+    public void visit(MJBooleanLiteral node) {
+        result = items.makeImmediateItem(node.getB1());
+    }
+
+    @Override
+    public void visit(MJCharacterLiteral node) {
+        result = items.makeImmediateItem(node.getC1());
+    }
+
+    @Override
+    public void visit(MJSimpleName node) {
+        Symbol symbol = node.expressionvalue.getSymbol();
+        if (symbol.isStatic()) {
+            result = items.makeStaticItem(symbol);
+        } else if (symbol.getMJKind().isConstant()) {
+            result = items.makeImmediateItem(symbol.getAddress());
+        } else {
+            result = items.makeLocalItem(symbol);
+        }
+    }
+
+    @Override
+    public void visit(MJQualifiedName node) {
+        if (node.getName().expressionvalue.getSymbol().getMJKind().isType()) {
+            result = items.makeImmediateItem(node.expressionvalue.getSymbol().getAddress());
+        } else {
+            generateExpression(node.getName()).load();
+            result = items.makeMemberItem(node.expressionvalue.getSymbol());
+        }
+    }
+
+    @Override
+    public void visit(MJLength node) {
+        generateExpression(node.getName()).load();
+        code.emitop0(arraylength);
+        result = items.makeStackItem(BuiltIn.INT);
+    }
+
+    @Override
+    public void visit(MJIfThen node) {
+        generateIf(node.getIf_condition(), node.getStatement(), null);
+    }
+
+    @Override
+    public void visit(MJIfThenElse node) {
+        generateIf(node.getIf_condition(), node.getStatement_no_short_if(), node.getStatement());
+    }
+
+    @Override
+    public void visit(MJIfThenElseNoShortIf node) {
+        generateIf(node.getIf_condition(), node.getStatement_no_short_if(), node.getStatement_no_short_if1());
+    }
+
+    private void generateIf(SyntaxNode condition, SyntaxNode thenBranch, SyntaxNode elseBranch) {
+        Chain thenExit = null;
+        ConditionalItem conditional = generateConditional(condition);
+
+        Chain elseChain = conditional.jumpFalse();
+        if (!conditional.isFalse()) {
+            code.resolve(conditional.trueJumps);
+            generateStatement(thenBranch);
+            thenExit = code.branch(jmp);
+        }
+
+        if (elseChain != null) {
+            code.resolve(elseChain);
+            if (elseBranch != null) {
+                generateStatement(elseBranch);
+            }
+        }
+
+        code.resolve(thenExit);
+    }
+
+    private static final class GeneratorContext {
+        Chain exit = null;
+        Chain bodyEntry = null;
+    }
+
+    private GeneratorContext info;
+
+    @Override
+    public void visit(MJSwitch node) {
+        if (node.getSwitch_block() instanceof MJEmptySwitchBlock) {
+            return;
+        }
+
+        Item selector = generateExpression(node.getExpression());
+        selector.load();
+
+        GeneratorContext old = info;
+        info = new GeneratorContext();
+
+        node.getSwitch_block().accept(this);
+        code.resolve(info.exit);
+
+        info = old;
+        selector.drop();
+    }
+
+    @Override
+    public void visit(MJSwitchStatementsGroup node) {
+        node.getSwitch_labels().accept(this);
+
+        Chain skip = code.branch(jmp);
+
+        code.resolve(info.bodyEntry);
+        generateStatement(node.getBlock_statements());
+        code.resolve(skip);
+    }
+
+    @Override
+    public void visit(MJSwitchLabelValue node) {
+        code.emitop0(dup);
+        items.makeImmediateItem(node.getI1()).load();
+        info.bodyEntry = mergeChains(info.bodyEntry, code.branch(ifeq));
+    }
+
+    // TODO move the below methods with other traversal methods AND ADD missing for labels and statements
+
+    @Override
+    public void visit(MJFirstSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJSwitchStatements node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJFirstSwitchStatementGroups node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextSwitchStatementsGroups node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJThis node) {
+        result = items.makeThisItem();
+    }
+
+    @Override
+    public void visit(MJParenthesisedExpression node) {
+        result = generateExpression(node.getExpression()).load();
+    }
+
+    @Override
+    public void visit(MJClassInstanceCreation node) {
+        Type type = node.expressionvalue.getType();
+        int fieldCount = type.getFieldCount();
+        code.emitop2(new_, fieldCount);
+    }
+
+    @Override
+    public void visit(MJArrayCreation node) {
+        Type arrayType = node.expressionvalue.getType().getElementType();
+        generateExpression(node.getExpression()).load();
+        code.emitop1(newarray, arrayType == BuiltIn.CHAR ? 1 : 0);
+    }
+
+    @Override
+    public void visit(MJFieldAccess node) {
+        generateExpression(node.getPrimary()).load();
+        result = items.makeMemberItem(node.expressionvalue.getSymbol());
+    }
+
+    @Override
+    public void visit(MJLengthFieldAcces node) {
+        generateExpression(node.getPrimary()).load();
+        code.emitop0(arraylength);
+        result = items.makeStackItem(BuiltIn.INT);
+    }
+
+    @Override
+    public void visit(MJMethodInvocation node) {
+        Item item = generateExpression(node.getName());
+        generateArguments(node.getArgument_list_opt());
+        item.invoke();
+    }
+
+    @Override
+    public void visit(MJQualifiedMethodInvocation node) {
+        generateExpression(node.getPrimary()).load();
+        Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
+        generateArguments(node.getArgument_list_opt());
+        item.invoke();
+    }
+
+    private void generateArguments(Argument_list_opt node) {
+        generateExpression(node);
+    }
+
+    @Override
+    public void visit(MJRead node) {
+        Item item = generateExpression(node.getExpression()).load(); // generate argument
+        code.emitop0(getInstruction(item.typecode, read));
+    }
+
+    @Override
+    public void visit(MJPrint node) {
+        Item item = generateExpression(node.getExpression()).load();
+        items.makeImmediateItem(1).load();
+        code.emitop0(getInstruction(item.typecode, print));
+    }
+
+    @Override
+    public void visit(MJPrintConst node) {
+        Item item = generateExpression(node.getExpression()).load();
+        items.makeImmediateItem(node.getI2()).load();
+        code.emitop0(getInstruction(item.typecode, print));
+    }
+
+    private static int getInstruction(int typecode, int base) {
+        switch (typecode) {
+            case intCode: return base;
+            case charCode:
+            case byteCode:
+                return base + 2;
+            default:
+                throw new AssertionError("Unexpected typecode: " + typecode);
+        }
+    }
+
+    @Override
+    public void visit(MJArrayAccess node) {
+        generateExpression(node.getName()).load();
+        generateExpression(node.getExpression()).load();
+        result = items.makeIndexedItem(node.expressionvalue.getType());
+    }
+
+    @Override
+    public void visit(MJQualifiedArrayAccess node) {
+        generateExpression(node.getPrimary_no_new_array()).load();
+        generateExpression(node.getExpression()).load();
+        result = items.makeIndexedItem(node.expressionvalue.getType());
+    }
+
+    @Override
+    public void visit(MJArgument node) {
+        generateExpression(node.getExpression()).load();
+    }
+
+    @Override
+    public void visit(MJPostincrement node) {
+        generateUnary(node.getPostfix_expression(), add);
+    }
+
+    @Override
+    public void visit(MJPostdecrement node) {
+        generateUnary(node.getPostfix_expression(), sub);
+    }
+
+    private void generateUnary(SyntaxNode node, int opcode) {
+        Item item = generateExpression(node);
+
+        item.duplicate();
+
+        Item res = item.load();
+        if (item instanceof LocalItem) {
+            ((LocalItem) item).increment(opcode == add ? 1 : -1);
+        } else {
+            item.stash(item.typecode);
+            code.emitop0(const_1);
+            code.emitop0(opcode);
+            item.store();
+        }
+        result = res;
+    }
+
+    @Override
+    public void visit(MJNegation node) {
+        result = generateExpression(node.getUnary_expression()).load();
+        code.emitop0(neg);
+    }
+
+    @Override
+    public void visit(MJMultiplication node) {
+        result = finishBinary(node.getMultiplicative_expression(), node.getUnary_expression(), mul);
+    }
+
+    @Override
+    public void visit(MJDivision node) {
+        result = finishBinary(node.getMultiplicative_expression(), node.getUnary_expression(), div);
+    }
+
+    @Override
+    public void visit(MJModulo node) {
+        result = finishBinary(node.getMultiplicative_expression(), node.getUnary_expression(), rem);
+    }
+
+    @Override
+    public void visit(MJAddition node) {
+        result = finishBinary(node.getAdditive_expression(), node.getMultiplicative_expression(), add);
+    }
+
+    @Override
+    public void visit(MJSubtraction node) {
+        result = finishBinary(node.getAdditive_expression(), node.getMultiplicative_expression(), sub);
+    }
+
+    @Override
+    public void visit(MJLessThan node) {
+        result = finishBinary(node.getRelational_expression(), node.getAdditive_expression(), iflt);
+    }
+
+    @Override
+    public void visit(MJGreaterThan node) {
+        result = finishBinary(node.getRelational_expression(), node.getAdditive_expression(), ifgt);
+    }
+
+    @Override
+    public void visit(MJLessThanOrEqualTo node) {
+        result = finishBinary(node.getRelational_expression(), node.getAdditive_expression(), ifle);
+    }
+
+    @Override
+    public void visit(MJGreaterThanOrEqualTo node) {
+        result = finishBinary(node.getRelational_expression(), node.getAdditive_expression(), ifge);
+    }
+
+    @Override
+    public void visit(MJEqual node) {
+        result = finishBinary(node.getEqualiity_expression(), node.getRelational_expression(), ifeq);
+    }
+
+    @Override
+    public void visit(MJNotEqual node) {
+        result = finishBinary(node.getEqualiity_expression(), node.getRelational_expression(), ifne);
+    }
+
+    private Item finishBinary(
+            SyntaxNode left,
+            SyntaxNode right,
+            int opcode
+    ) {
+        Item leftItem = generateExpression(left);
+        Item rightItem = generateExpression(right);
+        if (opcode >= ifeq && opcode <= ifle) {
+            if (leftItem instanceof ImmediateItem && rightItem instanceof ImmediateItem) {
+                int leftValue = ((ImmediateItem) leftItem).value;
+                int rightValue = ((ImmediateItem) rightItem).value;
+                return evaluate(leftValue, rightValue, opcode)
+                        ? items.makeConditionalItem(jmp, code.branch(jmp), null)
+                        : items.makeConditionalItem(jmp, null, code.branch(jmp));
+            }
+            leftItem.load();
+            rightItem.load();
+            return items.makeConditionalItem(jmp, code.branch(jmp), null);
+        } else if (opcode >= add && opcode <= rem) {
+            if (leftItem instanceof ImmediateItem && rightItem instanceof ImmediateItem) {
+                int leftValue = ((ImmediateItem) leftItem).value;
+                int rightValue = ((ImmediateItem) rightItem).value;
+                return items.makeImmediateItem(calculate(leftValue, rightValue, opcode));
+            }
+            leftItem.load();
+            rightItem.load();
+            code.emitop0(opcode);
+            return items.makeStackItem(BuiltIn.INT);
+        } else {
+            throw new AssertionError("Unexpected opcode: " + opcode);
+        }
+    }
+
+    private static boolean evaluate(int left, int right, int opcode) {
+        switch (opcode) {
+            case ifeq: return left == right;
+            case ifne: return left != right;
+            case iflt: return left < right;
+            case ifle: return left <= right;
+            case ifgt: return left > right;
+            case ifge: return left >= right;
+            default: throw new AssertionError("Unexpected opcode: " + opcode);
+        }
+    }
+
+    private static int calculate(int left, int right, int opcode) {
+        switch (opcode) {
+            case add: return left + right;
+            case sub: return left - right;
+            case mul: return left * right;
+            case div: return left / right;
+            case rem: return left % right;
+            default: throw new AssertionError("Unexpected opcode: " + opcode);
+        }
+    }
+
+    @Override
+    public void visit(MJConjuction node) {
+        ConditionalItem left = generateConditional(node.getConditional_and_expression());
+        if (!left.isFalse()) {
+            Chain falseJumps = left.jumpFalse();
+            code.resolve(left.trueJumps);
+            ConditionalItem right = generateConditional(node.getEqualiity_expression());
+            result = items.makeConditionalItem(
+                    right.opcode,
+                    right.trueJumps,
+                    mergeChains(falseJumps, right.falseJumps)
+            );
+        } else {
+            result = left;
+        }
+    }
+
+    @Override
+    public void visit(MJDisjunction node) {
+        ConditionalItem left = generateConditional(node.getConditional_or_expression());
+        if (!left.isTrue()) {
+            Chain trueJumps = left.jumpTrue();
+            code.resolve(left.falseJumps);
+            ConditionalItem right = generateConditional(node.getConditional_and_expression());
+            result = items.makeConditionalItem(
+                    right.opcode,
+                    mergeChains(trueJumps, right.trueJumps),
+                    right.falseJumps
+            );
+        } else {
+            result = left;
+        }
+    }
+
+    @Override
+    public void visit(MJTernaryOperation node) {
+        SyntaxNode trueBranch = node.getExpression();
+        SyntaxNode falseBranch = node.getConditional_expression();
+
+        Chain thenExit = null;
+        ConditionalItem condition = generateConditional(node);
+        Chain elseChain = condition.jumpFalse();
+
+        if (!condition.isTrue()) {
+            code.resolve(condition.trueJumps);
+            generateExpression(trueBranch).load();
+            thenExit = code.branch(jmp);
+        }
+
+        if (elseChain != null) {
+            code.resolve(elseChain);
+            generateExpression(falseBranch).load();
+        }
+
+        code.resolve(thenExit);
+        result = items.makeStackItem(node.expressionvalue.getType());
+    }
+
+    @Override
+    public void visit(MJAssignment node) {
+        Item lhs = generateExpression(node.getLeft_hand_side());
+        generateExpression(node.getAssignment_expression()).load();
+        result = items.makeAssignItem(lhs);
+    }
+
+    @Override
+    public void visit(MJNoExpression node) {
+        result = null;
+    }
+
+    private void generateStatement(SyntaxNode node) {
+        node.accept(this);
+    }
+
+    private Item generateExpression(SyntaxNode node) {
+        node.accept(this);
+        return result;
+    }
+
+    private ConditionalItem generateConditional(SyntaxNode node) {
+        if (node instanceof MJTernaryOperation){
+            SyntaxNode conditional = ((MJTernaryOperation) node).getConditional_or_expression();
+            SyntaxNode trueBranch = ((MJTernaryOperation) node).getExpression();
+            SyntaxNode falseBranch = ((MJTernaryOperation) node).getConditional_expression();
+
+            ConditionalItem condition = generateConditional(conditional);
+
+            // if always true
+            if (condition.isTrue()) {
+                code.resolve(condition.trueJumps);
+                return generateConditional(trueBranch);
+            }
+
+            // if always false
+            if (condition.isFalse()) {
+                code.resolve(condition.falseJumps);
+                return generateConditional(falseBranch);
+            }
+
+            Chain secondJumps = condition.falseJumps;
+            code.resolve(condition.trueJumps);
+
+            ConditionalItem first = generateConditional(trueBranch);
+            Chain falseJumps = first.jumpFalse();
+            code.resolve(first.trueJumps);
+
+            Chain trueJumps = code.branch(jmp);
+            code.resolve(secondJumps);
+
+            ConditionalItem second = generateConditional(falseBranch);
+
+            return items.makeConditionalItem(
+                    second.opcode,
+                    mergeChains(trueJumps, second.trueJumps),
+                    mergeChains(falseJumps, second.falseJumps)
+            );
+        } else {
+            return generateExpression(node).makeConditional();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Traversal methods">
+
+    @Override
+    public void visit(MJConstLiteral node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNameSimple node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNameQualified node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJBlock node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJBlockStatements node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextStatementExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJFirstBlockStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJBlockStatement node) {
+        generateStatement(node.getStatement());
+    }
+
+    @Override
+    public void visit(MJStatementWithoutTrailingSubstatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJIfThenStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJIfThenElseStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJForStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJStatementWithoutTrailingSubstatementNoShortIf node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJIfThenElseStatementNoShortIf node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJIfCondition node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJForNoShortIf node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJExpressionStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJStatementBlock node) {
+        generateStatement(node.getBlock());
+    }
+
+    @Override
+    public void visit(MJSwitchStatement node) {
+        generateStatement(node.getSwitch_statement());
+    }
+
+    @Override
+    public void visit(MJBreakStatement node) {
+        generateStatement(node.getBreak_statement());
+    }
+
+    @Override
+    public void visit(MJContinueStatement node) {
+        generateStatement(node.getContinue_statement());
+    }
+
+    @Override
+    public void visit(MJReturnStatement node) {
+        generateStatement(node.getReturn_statement());
+    }
+
+    @Override
+    public void visit(MJStatementExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJAssignmentStatementExpression node) {
+        generateExpression(node.getAssignment());
+    }
+
+    @Override
+    public void visit(MJPostincrementStatementExpression node) {
+        generateStatement(node.getPostincrement_expression());
+    }
+
+    @Override
+    public void visit(MJPostdecrementStatementExpression node) {
+        generateStatement(node.getPostdecrement_expression());
+    }
+
+    @Override
+    public void visit(MJMethodInvocationStatementExpression node) {
+        generateStatement(node.getMethod_invocation());
+    }
+
+    @Override
+    public void visit(MJClassInstanceCreationStatementExpression node) {
+        generateStatement(node.getClass_instance_creation_expression());
+    }
+
+    @Override
+    public void visit(MJPrimaryNoNewArray node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryClassInstanceCreationExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryArrayCreationExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryLiteral node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryFieldAccess node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryMethodInvocation node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryArrayAccess node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJArgumentList node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextArgument node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPrimaryExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNameExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPostincrementExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPostdecrementExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJPostfixExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJUnaryExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJMultiplicativeExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJAdditiveExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJRelationalExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJEqualityExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJConditionalAndExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJConditionalOrExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJConditionalExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJAssignmentExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJLeftHandSideName node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJLeftHandSideFieldAccress node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJLeftHandSideArrayAccess node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJExpressionOption node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJExpression node) {
+        node.childrenAccept(this);
+    }
+    // </editor-fold>
+}
