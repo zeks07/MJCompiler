@@ -37,7 +37,7 @@ public final class Environment {
             return BuiltIn.NO_OBJECT;
         }
 
-        return table.insert(kind, name, type);
+        return table.insert(kind, name, type, node);
     }
 
     public Symbol findType(String name, SyntaxNode node) {
@@ -180,7 +180,7 @@ public final class Environment {
 
     public void enterClassDeclaration(String name, SyntaxNode node) {
         Type type = new MJType(TypeKind.CLASS, name);
-        Symbol clazz = insert(SymbolKind.TYPE, name, type, node);
+        ClassSymbol clazz = (ClassSymbol) insert(SymbolKind.TYPE, name, type, node);
         context = new ScopeContext.ClassDeclarationContext(context, clazz);
         table.openScope();
     }
@@ -193,11 +193,11 @@ public final class Environment {
         }
     }
 
-    public Symbol exitClassDeclaration(SyntaxNode node) {
+    public ClassSymbol exitClassDeclaration(SyntaxNode node) {
         addSuperMethods(node);
         context.setModifiers();
 
-        Symbol clazz = context.getObject();
+        ClassSymbol clazz = (ClassSymbol) context.getObject();
         context = context.outer;
         table.chainMembersTo(clazz.getSymbolType());
         table.closeScope();

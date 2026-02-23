@@ -217,7 +217,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
             node.getClass_body().traverseBottomUp(classDeclarationVisitor);
 
-            node.symbol = environment.exitClassDeclaration(node);
+            node.classsymbol = environment.exitClassDeclaration(node);
         }
 
         @Override

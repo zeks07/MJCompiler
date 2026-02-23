@@ -46,10 +46,20 @@ public final class BytecodeEmitter {
         }
     }
 
+    private int get1(int pc) {
+        return buf[pc] & 0xFF;
+    }
+
     private void emitop(int op) {
         if (pendingJumps != null) resolvePending();
         if (!alive) return;
         emit1(op);
+    }
+
+    public void emitInvokevirtual(String name) {
+        emit1(invokevirtual);
+        for (char c : name.toCharArray()) emit1(c);
+        emit1(const_m1);
     }
 
     public void emitop0(int op) {
@@ -107,6 +117,14 @@ public final class BytecodeEmitter {
         return pc;
     }
 
+    public void setMain() {
+        mainPc = pc;
+    }
+
+    public void emitCall(int address) {
+        emitop2(call, address - pc + 1);
+    }
+
     public static class Chain {
         public final int pc;
         public final Chain next;
@@ -131,9 +149,18 @@ public final class BytecodeEmitter {
     }
 
     public void resolve(Chain chain, int target) {
-        while  (chain != null) {
-            put2(chain.pc + 1, target - chain.pc);
-            chain = chain.next;
+        while (chain != null) {
+            if (get1(chain.pc) == jmp && chain.pc + 3 == target && target == pc) {
+                pc = pc - 3;
+                target = target - 3;
+                if (chain.next == null) {
+                    alive = true;
+                    break;
+                }
+            } else {
+                put2(chain.pc + 1, target - chain.pc);
+                chain = chain.next;
+            }
         }
     }
 

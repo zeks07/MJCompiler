@@ -2,7 +2,9 @@ package rs.ac.bg.etf.pp1;
 
 import java_cup.runtime.Scanner;
 import java_cup.runtime.Symbol;
+import rs.ac.bg.etf.pp1.ast.MJProgram;
 import rs.ac.bg.etf.pp1.ast.Program;
+import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
 import rs.ac.bg.etf.pp1.semantic.Environment;
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.semantic.SemanticAnalyser;
@@ -71,9 +73,12 @@ public final class Compiler {
 
         program.accept(analyser);
 
-        DumpSymbolTableVisitor visitor = new DumpSymbolTableVisitor();
-        SymbolTable table = SymbolTable.getInstance(context);
-        table.dump(visitor);
+//        DumpSymbolTableVisitor visitor = new DumpSymbolTableVisitor();
+//        SymbolTable table = SymbolTable.getInstance(context);
+//        table.dump(visitor);
 //        System.out.println(program.toString(" "));
+
+        CodeGenerator generator = new CodeGenerator(context);
+        generator.generateProgram((MJProgram) program);
     }
 }

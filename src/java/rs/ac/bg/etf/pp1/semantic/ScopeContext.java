@@ -2,6 +2,7 @@ package rs.ac.bg.etf.pp1.semantic;
 
 import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
+import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.Type;
 
 import java.util.HashSet;
@@ -91,9 +92,9 @@ public class ScopeContext {
     }
 
     public static final class ClassDeclarationContext extends ScopeContext {
-        final Symbol clazz;
+        final ClassSymbol clazz;
 
-        public ClassDeclarationContext(ScopeContext outer, Symbol clazz) {
+        public ClassDeclarationContext(ScopeContext outer, ClassSymbol clazz) {
             super(outer);
             this.clazz = clazz;
         }
@@ -191,7 +192,6 @@ public class ScopeContext {
         public boolean isInClass() {
             return outer.isInClass();
         }
-
     }
 
     public static abstract class StatementContext extends ScopeContext {

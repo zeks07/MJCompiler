@@ -73,7 +73,7 @@ nonterminal Enum_body enum_body;
 nonterminal  Enum_entries_opt enum_entries_opt;
 nonterminal Enum_entries enum_entries;
 nonterminal Enum_entry enum_entry;
-non terminal rs.ac.bg.etf.pp1.symbols.Symbol class_delcaration;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.ClassSymbol class_delcaration;
 non terminal Super_opt super_opt;
 nonterminal Class_body class_body;
 non terminal Member_declarations_opt member_declarations_opt;

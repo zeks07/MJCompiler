@@ -1,5 +1,7 @@
 package rs.ac.bg.etf.pp1.symbols;
 
+import rs.ac.bg.etf.pp1.ast.MJProgram;
+import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
@@ -36,12 +38,18 @@ public final class SymbolTable {
         nestingLevel--;
     }
 
-    public Symbol insert(SymbolKind kind, String name, Type type) {
+    public Symbol insert(
+            SymbolKind kind,
+            String name,
+            Type type,
+            SyntaxNode node
+    ) {
         int level = nestingLevel > 0 && !kind.isCallable() ? 1 : 0;
         MJSymbol symbol;
         switch (kind) {
             case PROGRAM: symbol = new ProgramSymbol(name); break;
-            case METHOD: symbol = new MethodSymbol(name, type); break;
+            case METHOD: symbol = new MethodSymbol(name, type, node); break;
+            case TYPE: symbol = new ClassSymbol(name, type, node); break;
             default: symbol = new MJSymbol(kind, name, type, 0, level);
         }
         if (!Tab.currentScope().addToLocals(symbol)) {

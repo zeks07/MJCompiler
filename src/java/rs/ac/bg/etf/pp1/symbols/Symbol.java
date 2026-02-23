@@ -1,13 +1,14 @@
 package rs.ac.bg.etf.pp1.symbols;
 
+import rs.ac.bg.etf.pp1.ast.MJProgram;
+import rs.ac.bg.etf.pp1.ast.SyntaxNode;
+import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface Symbol {
@@ -22,6 +23,7 @@ public interface Symbol {
     boolean isAbstract();
     void setLocalSymbols(SymbolDataStructure locals);
     boolean isStatic();
+    boolean isMember();
     Collection<Symbol> getLocals();
     void accept(SymbolTableVisitor visitor);
     Obj getObj();
@@ -109,6 +111,11 @@ public interface Symbol {
         }
 
         @Override
+        public boolean isMember() {
+            return getMJKind().isField();
+        }
+
+        @Override
         public Collection<Symbol> getLocals() {
             return getLocalSymbols().stream()
                     .map(Symbol::normalize)
@@ -133,14 +140,54 @@ public interface Symbol {
             }
             return count;
         }
+
+        public List<MethodSymbol> getMethods() {
+            List<MethodSymbol> methods = new ArrayList<>();
+            for (Symbol symbol : getLocals()) {
+                if (symbol instanceof MethodSymbol) methods.add((MethodSymbol) symbol);
+            }
+            return methods;
+        }
+
+        public List<ClassSymbol> getClasses() {
+            List<ClassSymbol> classes = new ArrayList<>();
+            for (Symbol symbol : getLocals()) {
+                if (symbol instanceof ClassSymbol) classes.add((ClassSymbol) symbol);
+            }
+            return classes;
+        }
+    }
+
+    class ClassSymbol extends MJSymbol {
+        private final SyntaxNode node;
+        public ClassSymbol(String name, Type type, SyntaxNode node) {
+            super(SymbolKind.TYPE, name, type);
+            this.node = node;
+        }
+
+        public List<MethodSymbol> getMethods() {
+            List<MethodSymbol> methods = new ArrayList<>();
+            for (Symbol symbol : getSymbolType().getMJMembers()) {
+                if (symbol instanceof MethodSymbol) methods.add((MethodSymbol) symbol);
+            }
+            return methods;
+        }
+
+        public SyntaxNode getNode() {
+            return node;
+        }
     }
 
     class MethodSymbol extends MJSymbol {
         private boolean isMain;
         private Symbol owner;
+        private final SyntaxNode node;
+        private boolean defined = false;
+        public BytecodeEmitter.Chain forwardReference = null;
 
-        public MethodSymbol(String name, Type returnType) {
+        public MethodSymbol(String name, Type returnType, SyntaxNode node) {
             super(SymbolKind.METHOD, name, returnType);
+            this.node = node;
         }
 
         private int arity() {
@@ -216,6 +263,19 @@ public interface Symbol {
         public boolean isStatic() {
             return owner == null;
         }
+
+        @Override
+        public boolean isMember() {
+            return owner != null && owner.getMJKind().isType();
+        }
+
+        public SyntaxNode getNode() {
+            return node;
+        }
+
+        public boolean isDefined() {
+            return defined;
+        }
     }
 
     class LegacySymbol implements Symbol {
@@ -289,6 +349,11 @@ public interface Symbol {
         @Override
         public boolean isStatic() {
             return legacy.getLevel() == 0;
+        }
+
+        @Override
+        public boolean isMember() {
+            return false;
         }
 
         @Override

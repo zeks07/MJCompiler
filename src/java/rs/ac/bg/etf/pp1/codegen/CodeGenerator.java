@@ -2,36 +2,59 @@ package rs.ac.bg.etf.pp1.codegen;
 
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.codegen.Items.*;
-import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
-import rs.ac.bg.etf.pp1.symbols.SymbolTable;
+import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.Type;
 import rs.ac.bg.etf.pp1.util.Context;
+
+import java.util.List;
 
 import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
 import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
 
 public final class CodeGenerator extends VisitorAdaptor {
-    private final SymbolTable table;
-    private final CompilerLogger logger;
     private final BytecodeEmitter code;
     private final Items items;
 
     private Item result;
 
     public CodeGenerator(Context context) {
-        this.table = SymbolTable.getInstance(context);
-        this.logger = CompilerLogger.getInstance(context);
         this.code = BytecodeEmitter.getInstance(context);
-        this.items = new Items(code, table);
+        this.items = new Items(context);
     }
 
-    public void generateProgram(SyntaxNode node) {
+    public void generateProgram(MJProgram node) {
+        ProgramSymbol program = node.programsymbol;
+        List<ClassSymbol> classes = program.getClasses();
+        List<MethodSymbol> methods = program.getMethods();
+        int staticFieldCount = program.getStaticFieldCount();
+
+        code.setDataSize(staticFieldCount);
+
+        for (ClassSymbol clazz : classes) {
+            List<MethodSymbol> classMethods = clazz.getMethods();
+
+            for (MethodSymbol method : classMethods) {
+                generateMethod(method);
+            }
+        }
+
+        for (MethodSymbol method : methods) {
+            String name = method.getName();
+            if (name.equals("main")) {
+                generateVFT(classes);
+                code.setMain();
+            }
+            generateMethod(method);
+        }
     }
 
-    private void generateMethod(MJMethodBody node) {
-        generateStatement(node);
+    private void generateMethod(MethodSymbol node) {
+    }
+
+    private void generateVFT(List<ClassSymbol> classes) {
+
     }
 
     @Override
@@ -61,6 +84,8 @@ public final class CodeGenerator extends VisitorAdaptor {
             result = items.makeStaticItem(symbol);
         } else if (symbol.getMJKind().isConstant()) {
             result = items.makeImmediateItem(symbol.getAddress());
+        } else if (symbol.isMember()) {
+            result = items.makeMemberItem(symbol);
         } else {
             result = items.makeLocalItem(symbol);
         }
@@ -234,16 +259,16 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJMethodInvocation node) {
-        Item item = generateExpression(node.getName());
         generateArguments(node.getArgument_list_opt());
+        Item item = generateExpression(node.getName());
         item.invoke();
     }
 
     @Override
     public void visit(MJQualifiedMethodInvocation node) {
         generateExpression(node.getPrimary()).load();
-        Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
         generateArguments(node.getArgument_list_opt());
+        Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
         item.invoke();
     }
 

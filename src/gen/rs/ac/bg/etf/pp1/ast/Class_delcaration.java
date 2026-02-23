@@ -1,6 +1,6 @@
 // generated with ast extension for cup
 // version 0.8
-// 19/1/2026 13:4:25
+// 23/1/2026 14:34:26
 
 
 package rs.ac.bg.etf.pp1.ast;
@@ -11,7 +11,7 @@ public abstract class Class_delcaration implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbols.Symbol symbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.ClassSymbol classsymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

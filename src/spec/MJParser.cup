@@ -62,7 +62,7 @@ non terminal static_declarations_opt, static_declarations, static_declaration;
 non terminal static_methods_block, static_method_declarations_opt, static_method_declarations, static_method_declarations_element;
 non terminal modifiers_opt, modifiers, modifier;
 non terminal enum_declaration, enum_body,  enum_entries_opt, enum_entries, enum_entry;
-non terminal rs.ac.bg.etf.pp1.symbols.Symbol class_delcaration;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.ClassSymbol class_delcaration;
 non terminal super_opt, class_body;
 non terminal member_declarations_opt, member_declarations, member_declaration;
 non terminal field_declaration, variable_declarators, variable_declarator_id;

@@ -2,8 +2,10 @@ package rs.ac.bg.etf.pp1.codegen;
 
 import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
+import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.SymbolTable;
 import rs.ac.bg.etf.pp1.symbols.Type;
+import rs.ac.bg.etf.pp1.util.Context;
 
 import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
 import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
@@ -16,9 +18,9 @@ public final class Items {
     private final Item thisItem = new SelfItem();
     private final Item[] stackItem = new Item[TypeCodeCount];
 
-    public Items(BytecodeEmitter code, SymbolTable table) {
-        this.code = code;
-        this.table = table;
+    public Items(Context context) {
+        this.code = BytecodeEmitter.getInstance(context);
+        this.table = SymbolTable.getInstance(context);
         for (int i = 0; i < voidCode; i++) stackItem[i] = new StackItem(i);
         stackItem[voidCode] = voidItem;
     }
@@ -229,8 +231,9 @@ public final class Items {
         }
 
         Item invoke() {
-            // TODO
-            return null;
+            load();
+            code.emitInvokevirtual(symbol.getName());
+            return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
         }
     }
 
@@ -280,8 +283,14 @@ public final class Items {
         }
 
         Item invoke() {
-            // TODO
-            return null;
+            if (!(symbol instanceof MethodSymbol)) {
+                throw new AssertionError("Expected method symbol");
+            }
+
+            MethodSymbol method = (MethodSymbol) symbol;
+            if (method.isDefined()) {
+                code.emitCall(method.getAddress());
+            }
         }
     }
 
