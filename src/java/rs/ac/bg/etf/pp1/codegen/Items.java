@@ -319,7 +319,8 @@ public final class Items {
     /**
      * Represents a conditional or unconditional jump.
      */
-    final class ConditionalItem extends Item {
+    final class
+    ConditionalItem extends Item {
         Chain trueJumps;
         Chain falseJumps;
         int opcode;
@@ -366,12 +367,6 @@ public final class Items {
 
         Chain jumpFalse() {
             return mergeChains(falseJumps, code.branch(BytecodeEmitter.negate(opcode)));
-        }
-
-        ConditionalItem negate() {
-            ConditionalItem conditionalItem = new ConditionalItem(BytecodeEmitter.negate(opcode), falseJumps, trueJumps);
-            conditionalItem.tree = tree;
-            return conditionalItem;
         }
 
         boolean isTrue() {

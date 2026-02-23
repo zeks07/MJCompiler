@@ -46,6 +46,10 @@ public final class BytecodeEmitter {
         }
     }
 
+    private int get1(int pc) {
+        return buf[pc] & 0xff;
+    }
+
     private void emitop(int op) {
         if (pendingJumps != null) resolvePending();
         if (!alive) return;
@@ -131,9 +135,18 @@ public final class BytecodeEmitter {
     }
 
     public void resolve(Chain chain, int target) {
-        while  (chain != null) {
-            put2(chain.pc + 1, target - chain.pc);
-            chain = chain.next;
+        while (chain != null) {
+            if (get1(chain.pc) == jmp && chain.pc + 3 == target && target == pc) {
+                pc = pc - 3;
+                target = target - 3;
+                if (chain.next == null) {
+                    alive = true;
+                    break;
+                }
+            } else {
+                put2(chain.pc + 1, target - chain.pc);
+                chain = chain.next;
+            }
         }
     }
 

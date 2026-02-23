@@ -1,5 +1,5 @@
 program Program
-    abstract class A
+    abstract class A c
     {
         abstract int getValue(int a);
     }
@@ -38,7 +38,7 @@ program Program
     void main()
         B a; C c; int i; int x[]; char ch;
     {
-        a = new A;
+        a 4= new A;
         a.x = new int[5];
         a.y = new int[5];
         c = new C;
