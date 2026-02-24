@@ -38,7 +38,7 @@ program Program
     void main()
         B a; C c; int i; int x[]; char ch;
     {
-        a = new A; // error (abstract initialization and a is of type B)
+        a = new A;
         a.x = new int[5];
         a.y = new int[5];
         c = new C;
@@ -57,7 +57,9 @@ program Program
         switch (i) {
             case 0:
             case 1: break;
-            case 0: break; // error
+            case 0: break;
         }
+
+        x.length = 5;
     }
 }

@@ -14,6 +14,8 @@ import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
 import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
 
 public final class CodeGenerator extends VisitorAdaptor {
+    private final SymbolTable table;
+    private final CompilerLogger logger;
     private final BytecodeEmitter code;
     private final Items items;
 
@@ -146,7 +148,16 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     private static final class GeneratorContext {
         Chain exit = null;
+        Chain continue_ = null;
         Chain bodyEntry = null;
+
+        void addExit(Chain chain) {
+            exit = mergeChains(chain, exit);
+        }
+
+        void addContinue(Chain chain) {
+            continue_ = mergeChains(chain, continue_);
+        }
     }
 
     private GeneratorContext info;
@@ -175,10 +186,11 @@ public final class CodeGenerator extends VisitorAdaptor {
         node.getSwitch_labels().accept(this);
 
         Chain skip = code.branch(jmp);
-
         code.resolve(info.bodyEntry);
+
         generateStatement(node.getBlock_statements());
         code.resolve(skip);
+        info.bodyEntry = null;
     }
 
     @Override
@@ -188,36 +200,49 @@ public final class CodeGenerator extends VisitorAdaptor {
         info.bodyEntry = mergeChains(info.bodyEntry, code.branch(ifeq));
     }
 
-    // TODO move the below methods with other traversal methods AND ADD missing for labels and statements
-
     @Override
-    public void visit(MJFirstSwitchLabel node) {
-        node.childrenAccept(this);
+    public void visit(MJFor node) {
+        generateStatement(node.getFor_init_opt());
+        SyntaxNode condition = null;
+        if (node.getExpression_opt() instanceof MJExpressionOption) {
+            condition = ((MJExpressionOption) node.getExpression_opt()).getExpression();
+        }
+        generateLoop(node.getStatement(), condition, node.getFor_update_opt());
+    }
+
+    private void generateLoop(SyntaxNode body, SyntaxNode condition, SyntaxNode step) {
+        int start = code.entryPoint();
+        ConditionalItem conditional;
+        if (condition != null) {
+            conditional = generateConditional(condition);
+        } else {
+            conditional = items.makeConditionalItem(jmp);
+        }
+        Chain loopDone = conditional.jumpFalse();
+        code.resolve(conditional.trueJumps);
+        generateStatement(body);
+        code.resolve(info.continue_);
+        generateStatement(step);
+        code.resolve(code.branch(jmp), start);
+        code.resolve(loopDone);
     }
 
     @Override
-    public void visit(MJNextSwitchLabel node) {
-        node.childrenAccept(this);
+    public void visit(MJBreak node) {
+        info.addExit(code.branch(jmp));
     }
 
     @Override
-    public void visit(MJSwitchLabel node) {
-        node.childrenAccept(this);
+    public void visit(MJContinue node) {
+        info.addContinue(code.branch(jmp));
     }
 
     @Override
-    public void visit(MJSwitchStatements node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJFirstSwitchStatementGroups node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextSwitchStatementsGroups node) {
-        node.childrenAccept(this);
+    public void visit(MJReturn node) {
+        if (node.getExpression_opt() instanceof MJExpressionOption) {
+            generateExpression(node.getExpression_opt()).load();
+        }
+        code.emitop0(return_);
     }
 
     @Override
@@ -687,6 +712,62 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJSwitchStatement node) {
         generateStatement(node.getSwitch_statement());
     }
+
+    @Override
+    public void visit(MJForInitOpt node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJForInit node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJForUpdateOpt node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJForUpdate node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJFirstStatementExpression node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJFirstSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJSwitchLabel node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJSwitchStatements node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJFirstSwitchStatementGroups node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextSwitchStatementsGroups node) {
+        node.childrenAccept(this);
+    }
+
 
     @Override
     public void visit(MJBreakStatement node) {
