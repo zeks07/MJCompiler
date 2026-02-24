@@ -252,7 +252,7 @@ public final class Items {
             } else if (value == -1) {
                 code.emitop0(const_m1);
             } else {
-                code.emitop2w(const_, value);
+                code.emitop4(const_, value);
             }
             return stackItem[typecode];
         }
@@ -290,7 +290,11 @@ public final class Items {
             MethodSymbol method = (MethodSymbol) symbol;
             if (method.isDefined()) {
                 code.emitCall(method.getAddress());
+            } else {
+                method.forwardReference = code.emitCall(method.forwardReference);
             }
+
+            return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
         }
     }
 

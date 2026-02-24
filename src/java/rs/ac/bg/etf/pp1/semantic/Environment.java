@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.pp1.semantic;
 
+import rs.ac.bg.etf.pp1.ast.MJMethodDeclaration;
 import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.symbols.*;
@@ -251,7 +252,7 @@ public final class Environment {
     }
 
     public void declareMethod(String name, SyntaxNode node) {
-        MethodSymbol method = (MethodSymbol) insert(SymbolKind.METHOD, name, getType(), node);
+        MethodSymbol method = (MethodSymbol) insert(SymbolKind.METHOD, name, getType(), ((MJMethodDeclaration) node.getParent()).getMethod_body());
         context.setObject(method);
 
         table.openScope();

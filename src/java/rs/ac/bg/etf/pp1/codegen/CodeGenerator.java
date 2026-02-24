@@ -14,8 +14,6 @@ import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
 import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
 
 public final class CodeGenerator extends VisitorAdaptor {
-    private final SymbolTable table;
-    private final CompilerLogger logger;
     private final BytecodeEmitter code;
     private final Items items;
 
@@ -35,6 +33,8 @@ public final class CodeGenerator extends VisitorAdaptor {
         code.setDataSize(staticFieldCount);
 
         for (ClassSymbol clazz : classes) {
+            if (!clazz.getSymbolType().getMJKind().isClass()) continue;
+
             List<MethodSymbol> classMethods = clazz.getMethods();
 
             for (MethodSymbol method : classMethods) {
@@ -52,11 +52,42 @@ public final class CodeGenerator extends VisitorAdaptor {
         }
     }
 
-    private void generateMethod(MethodSymbol node) {
+    private void generateMethod(MethodSymbol method) {
+        Method_body node = (Method_body) method.getNode();
+
+        if (node instanceof MJAbstractMethodBody) {
+            return;
+        }
+
+        int pc = code.entryPoint();
+        method.setAddress(pc);
+        generateStatement(node);
+
+        if (!code.isAlive()) {
+            // everything returned normally
+            return;
+        }
+
+        if (method.getSymbolType().getMJKind().isVoid()) {
+            code.emitop0(return_);
+        } else {
+            // live code at the end of a method that expects return value.
+            // we do not have control flow checks, so this might happen.
+            code.emitop2(trap, 1);
+        }
     }
 
     private void generateVFT(List<ClassSymbol> classes) {
+        int nextStatic = code.getDataSize();
+        for (ClassSymbol clazz : classes) {
+            List<MethodSymbol> methods = clazz.getMethods();
+            if (methods.isEmpty()) continue;
 
+            for (MethodSymbol method : methods) {
+                nextStatic = code.emitVirtualFunction(method, nextStatic);
+            }
+            nextStatic = code.emitVFTEntryEnd(nextStatic);
+        }
     }
 
     @Override
@@ -286,7 +317,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJMethodInvocation node) {
         generateArguments(node.getArgument_list_opt());
         Item item = generateExpression(node.getName());
-        item.invoke();
+        result = item.invoke();
     }
 
     @Override
@@ -294,7 +325,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         generateExpression(node.getPrimary()).load();
         generateArguments(node.getArgument_list_opt());
         Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
-        item.invoke();
+        result = item.invoke();
     }
 
     private void generateArguments(Argument_list_opt node) {
@@ -630,6 +661,11 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJNameQualified node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJMethodBody node) {
         node.childrenAccept(this);
     }
 

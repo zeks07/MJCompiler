@@ -2,6 +2,9 @@ package rs.ac.bg.etf.pp1.codegen;
 
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.util.Context;
+import rs.etf.pp1.mj.runtime.Code;
+
+import java.io.OutputStream;
 
 import static rs.etf.pp1.mj.runtime.Code.*;
 import static rs.ac.bg.etf.pp1.symbols.Symbol.*;
@@ -46,6 +49,18 @@ public final class BytecodeEmitter {
         }
     }
 
+    private void emit4(int od) {
+        if (!alive) return;
+        if (pc + 4 > buf.length) {
+            emit1(od >> 24);
+            emit1(od >> 16);
+            emit1(od >> 8);
+            emit1(od);
+        } else {
+            put4(od);
+        }
+    }
+
     private int get1(int pc) {
         return buf[pc] & 0xFF;
     }
@@ -54,12 +69,6 @@ public final class BytecodeEmitter {
         if (pendingJumps != null) resolvePending();
         if (!alive) return;
         emit1(op);
-    }
-
-    public void emitInvokevirtual(String name) {
-        emit1(invokevirtual);
-        for (char c : name.toCharArray()) emit1(c);
-        emit1(const_m1);
     }
 
     public void emitop0(int op) {
@@ -86,17 +95,35 @@ public final class BytecodeEmitter {
         if (op == jmp) markDead();
     }
 
-    public void emitop2w(int op, int od) {
+    public void emitop4(int op, int od) {
         emitop(op);
         if (!alive) return;
-        emit2(od);
+        emit4(od);
     }
 
-    public void enterMethod(MethodSymbol method) {
-        method.setAddress(pc);
-        emit1(enter);
-        emit1(method.getLevel());
-        emit1(method.getLocalSymbols().size());
+    public int emitVirtualFunction(MethodSymbol method, int nextStatic) {
+        for (char c : method.getName().toCharArray()) {
+            emitop4(const_, c);
+            emitop2(putstatic, nextStatic++);
+        }
+        emitop(const_m1);
+        emitop2(putstatic, nextStatic++);
+        emitop4(const_, method.getAddress());
+        emitop2(invokevirtual, nextStatic++);
+
+        return nextStatic;
+    }
+
+    public int emitVFTEntryEnd(int nextStatic) {
+        emitop4(const_, -2);
+        emitop2(putstatic, nextStatic++);
+        return nextStatic;
+    }
+
+    public void emitInvokevirtual(String name) {
+        emit1(invokevirtual);
+        for (char c : name.toCharArray()) emit1(c);
+        emit1(const_m1);
     }
 
     public boolean isAlive() {
@@ -125,6 +152,11 @@ public final class BytecodeEmitter {
         emitop2(call, address - pc + 1);
     }
 
+    public Chain emitCall(Chain chain) {
+        emitop2(call, 0);
+        return mergeChains(chain, new Chain(pc - 3, null));
+    }
+
     public static class Chain {
         public final int pc;
         public final Chain next;
@@ -145,7 +177,16 @@ public final class BytecodeEmitter {
     }
 
     public Chain branch(int opcode) {
-        return new Chain(emitJump(opcode), null);
+        Chain result = null;
+        if (opcode == jmp) {
+            result = pendingJumps;
+            pendingJumps = null;
+        }
+        if (opcode != Bytecodes.dontjmp && isAlive()) {
+            result = new Chain(emitJump(opcode), result);
+            if (opcode == jmp) alive = false;
+        }
+        return result;
     }
 
     public void resolve(Chain chain, int target) {
@@ -160,6 +201,9 @@ public final class BytecodeEmitter {
             } else {
                 put2(chain.pc + 1, target - chain.pc);
                 chain = chain.next;
+            }
+            if (pc == target) {
+                alive = true;
             }
         }
     }
@@ -184,5 +228,13 @@ public final class BytecodeEmitter {
 
     public void setDataSize(int size) {
         dataSize = size;
+    }
+
+    public int getDataSize() {
+        return dataSize;
+    }
+
+    public static void write(OutputStream os) {
+        Code.write(os);
     }
 }

@@ -276,6 +276,12 @@ public interface Symbol {
         public boolean isDefined() {
             return defined;
         }
+
+        @Override
+        public void setAddress(int address) {
+            super.setAddress(address);
+            defined = true;
+        }
     }
 
     class LegacySymbol implements Symbol {

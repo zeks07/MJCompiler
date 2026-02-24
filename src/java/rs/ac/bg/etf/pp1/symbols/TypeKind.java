@@ -3,7 +3,7 @@ package rs.ac.bg.etf.pp1.symbols;
 import rs.ac.bg.etf.pp1.codegen.Bytecodes;
 
 public enum TypeKind {
-    NONE(Bytecodes.voidCode),
+    VOID(Bytecodes.voidCode),
     INT(Bytecodes.intCode),
     CHAR(Bytecodes.charCode),
     ARRAY(Bytecodes.objectCode),
@@ -16,6 +16,10 @@ public enum TypeKind {
 
     TypeKind(int typecode) {
         this.typecode = typecode;
+    }
+
+    public boolean isVoid() {
+        return this == VOID;
     }
 
     public boolean isArray() {
@@ -31,7 +35,7 @@ public enum TypeKind {
     }
 
     public boolean isExtendable() {
-        return this == CLASS || this == INTERFACE || this == NONE;
+        return this == CLASS || this == INTERFACE || this == VOID;
     }
 
     public boolean isPrimitive() {

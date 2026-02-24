@@ -4,6 +4,7 @@ import java_cup.runtime.Scanner;
 import java_cup.runtime.Symbol;
 import rs.ac.bg.etf.pp1.ast.MJProgram;
 import rs.ac.bg.etf.pp1.ast.Program;
+import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
 import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
 import rs.ac.bg.etf.pp1.semantic.Environment;
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
@@ -12,9 +13,13 @@ import rs.ac.bg.etf.pp1.semantic.DumpSymbolTableVisitor;
 import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.symbols.SymbolTable;
 import rs.ac.bg.etf.pp1.util.Context;
+import rs.etf.pp1.mj.runtime.disasm;
 import rs.etf.pp1.symboltable.Tab;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class Compiler {
     public static void main(String[] args) {
@@ -80,5 +85,14 @@ public final class Compiler {
 
         CodeGenerator generator = new CodeGenerator(context);
         generator.generateProgram((MJProgram) program);
+
+        Path output = Paths.get(file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3) + ".obj");
+        try (OutputStream os = Files.newOutputStream(output)) {
+            BytecodeEmitter.write(os);
+        } catch (IOException e) {
+            System.err.println("Failed to write bytecode to file `" + output);
+        }
+
+        disasm.main( new String[] { output.toString() });
     }
 }

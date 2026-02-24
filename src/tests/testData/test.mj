@@ -38,7 +38,7 @@ program Program
     void main()
         B a; C c; int i; int x[]; char ch;
     {
-        a = new A;
+        a = new B;
         a.x = new int[5];
         a.y = new int[5];
         c = new C;
@@ -53,13 +53,5 @@ program Program
         print(ch == 'e' ? e : pi);
         print(c.getValue(c.theA.x[0]));
         c.m();
-
-        switch (i) {
-            case 0:
-            case 1: break;
-            case 0: break;
-        }
-
-        x.length = 5;
     }
 }
