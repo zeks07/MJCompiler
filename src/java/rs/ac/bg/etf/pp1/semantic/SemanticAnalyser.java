@@ -1055,8 +1055,8 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             right.accept(expressionVisitor);
             Type rightType = right.expressionvalue.getType();
 
-            Operators.LEQ.check(leftType, rightType, environment, node);
-            node.expressionvalue = new ExpressionValue(Operators.LEQ.returnType(leftType, rightType));
+            Operators.LE.check(leftType, rightType, environment, node);
+            node.expressionvalue = new ExpressionValue(Operators.LE.returnType(leftType, rightType));
         }
 
         @Override
@@ -1069,8 +1069,8 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             right.accept(expressionVisitor);
             Type rightType = right.expressionvalue.getType();
 
-            Operators.GEQ.check(leftType, rightType, environment, node);
-            node.expressionvalue = new ExpressionValue(Operators.GEQ.returnType(leftType, rightType));
+            Operators.GE.check(leftType, rightType, environment, node);
+            node.expressionvalue = new ExpressionValue(Operators.GE.returnType(leftType, rightType));
         }
 
         @Override
@@ -1104,8 +1104,8 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             right.accept(expressionVisitor);
             Type rightType = right.expressionvalue.getType();
 
-            Operators.NEQ.check(leftType, rightType, environment, node);
-            node.expressionvalue = new ExpressionValue(Operators.NEQ.returnType(leftType, rightType));
+            Operators.NE.check(leftType, rightType, environment, node);
+            node.expressionvalue = new ExpressionValue(Operators.NE.returnType(leftType, rightType));
         }
 
         @Override

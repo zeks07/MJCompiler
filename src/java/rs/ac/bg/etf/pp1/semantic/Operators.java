@@ -25,11 +25,11 @@ public final class Operators {
     public static final BinaryOperator MOD = new ArithmeticOperator("%");
 
     public static final BinaryOperator EQ = new RelationalOperator("==");
-    public static final BinaryOperator NEQ = new RelationalOperator("!=");
+    public static final BinaryOperator NE = new RelationalOperator("!=");
     public static final BinaryOperator LT = new RelationalOperator("<");
-    public static final BinaryOperator LEQ = new RelationalOperator("<=");
+    public static final BinaryOperator LE = new RelationalOperator("<=");
     public static final BinaryOperator GT = new RelationalOperator(">");
-    public static final BinaryOperator GEQ = new RelationalOperator(">=");
+    public static final BinaryOperator GE = new RelationalOperator(">=");
 
     public static final BinaryOperator AND = new LogicalOperator("&&");
     public static final BinaryOperator OR = new LogicalOperator("||");
