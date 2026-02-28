@@ -670,7 +670,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
         public void visit(MJPrimaryLiteral node) {
             Literal literal = node.getLiteral();
             literal.traverseBottomUp(new LiteralVisitor());
-            node.expressionvalue = new ExpressionValue(literal.type);
+            node.expressionvalue = new ExpressionValue(literal.type, true);
         }
 
         @Override

@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.pp1.codegen;
 
-import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
 import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.SymbolTable;
@@ -58,11 +57,24 @@ public final class Items {
     }
 
     ConditionalItem makeConditionalItem(int opcode, Chain trueJumps, Chain falseJumps) {
-        return new ConditionalItem(opcode, trueJumps, falseJumps);
+        return makeConditionalItem(opcode, trueJumps, falseJumps, false);
+    }
+
+    ConditionalItem makeConditionalItem(
+            int opcode,
+            Chain trueJumps,
+            Chain falseJumps,
+            boolean isBinaryOperationResult
+    ) {
+        return new ConditionalItem(opcode, trueJumps, falseJumps, isBinaryOperationResult);
     }
 
     ConditionalItem makeConditionalItem(int opcode) {
-        return new ConditionalItem(opcode, null, null);
+        return makeConditionalItem(opcode, false);
+    }
+
+    ConditionalItem makeConditionalItem(int opcode, boolean isBinaryOperationResult) {
+        return new ConditionalItem(opcode, null, null, isBinaryOperationResult);
     }
 
     public Item makeStackItem(Type type) {
@@ -302,7 +314,7 @@ public final class Items {
         private final Item lhs;
 
         AssignItem(Item lhs) {
-            super(voidCode);
+            super(lhs.typecode);
             this.lhs = lhs;
         }
 
@@ -310,7 +322,7 @@ public final class Items {
         Item load() {
             lhs.stash(typecode);
             lhs.store();
-            return voidItem;
+            return stackItem[typecode];
         }
 
         @Override
@@ -332,19 +344,27 @@ public final class Items {
     /**
      * Represents a conditional or unconditional jump.
      */
-    final class
-    ConditionalItem extends Item {
+    final class ConditionalItem extends Item {
         Chain trueJumps;
         Chain falseJumps;
         int opcode;
-
-        SyntaxNode tree;
+        boolean isBinaryOperationResult;
 
         ConditionalItem(int opcode, Chain trueJumps, Chain falseJumps) {
+            this(opcode, trueJumps, falseJumps, false);
+        }
+
+        ConditionalItem(
+                int opcode,
+                Chain trueJumps,
+                Chain falseJumps,
+                boolean isBinaryOperationResult
+        ) {
             super(byteCode);
             this.opcode = opcode;
             this.trueJumps = trueJumps;
             this.falseJumps = falseJumps;
+            this.isBinaryOperationResult = isBinaryOperationResult;
         }
 
         @Override
@@ -354,11 +374,13 @@ public final class Items {
             if (!isFalse()) {
                 code.resolve(trueJumps);
                 code.emitop0(const_1);
+                if (!isBinaryOperationResult) code.emitop0(const_1);
                 trueChain = code.branch(jmp);
             }
             if (falseChain != null) {
                 code.resolve(falseChain);
                 code.emitop0(const_0);
+                if (!isBinaryOperationResult) code.emitop0(const_1);
             }
             code.resolve(trueChain);
             return stackItem[typecode];

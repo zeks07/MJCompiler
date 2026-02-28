@@ -19,7 +19,7 @@ public final class ScopeNode extends Node {
         return in(0);
     }
 
-    public Node control(Node node) {
+    public Node setControl(Node node) {
         return setDefinition(0, node);
     }
 
@@ -33,10 +33,20 @@ public final class ScopeNode extends Node {
         return null;
     }
 
+    /**
+     * Pushes a new scope.
+     * </p>
+     * Used when opening new blocks of statements.
+     */
     public void push() {
         scopes.push(new HashMap<>());
     }
 
+    /**
+     * Pops the last scope.
+     * </p>
+     * Used when closing blocks of statements.
+     */
     public void pop() {
         popN(scopes.pop().size());
     }
@@ -62,5 +72,26 @@ public final class ScopeNode extends Node {
         if (index == null) return update(name, node, nestingLevel - 1);
         Node old = in(index);
         return node == null ? old : setDefinition(index, node);
+    }
+
+    public ScopeNode duplicate() {
+        ScopeNode duplicate = new ScopeNode();
+        for (HashMap<String, Integer> symbols : scopes) {
+            duplicate.scopes.push(new HashMap<>(symbols));
+        }
+        duplicate.addDefinition(control());
+        for (int i = 1; i < inSize(); i++) {
+            duplicate.addDefinition(in(i));
+        }
+        return duplicate;
+    }
+
+    public Node mergeScopes(ScopeNode other) {
+        RegionNode region = (RegionNode) setControl(new RegionNode(null, control(), other.control()).peephole());
+        for (int i = 1; i < inSize(); i++) {
+            if (in(i) != other.in(i)) setDefinition(i, new PhiNode(region, in(i), other.in(i)).peephole());
+        }
+        other.kill();
+        return region;
     }
 }

@@ -55,13 +55,13 @@ public abstract class Node {
         return newDefinition;
     }
 
-    Node addDefinition(Node newDefinition) {
+    final Node addDefinition(Node newDefinition) {
         inputs.add(newDefinition);
         if (newDefinition != null) newDefinition.addUse(this);
         return newDefinition;
     }
 
-    protected <N extends Node> N addUse(Node node) {
+    final protected <N extends Node> N addUse(Node node) {
         outputs.add(node);
         return (N) this;
     }
@@ -71,14 +71,14 @@ public abstract class Node {
         return outputs.isEmpty();
     }
 
-    void popN(int n) {
+    final void popN(int n) {
         for(int i = 0; i < n; i++) {
             Node oldDefinition = inputs.remove(inputs.size() - 1);
             if (oldDefinition != null && oldDefinition.deleteUse(this)) oldDefinition.kill();
         }
     }
 
-    public void kill() {
+    final public void kill() {
         assert isUnused();
         for (int i = 0; i < inputs.size(); i++) {
             setDefinition(i, null);
@@ -88,7 +88,7 @@ public abstract class Node {
         assert isDead();
     }
 
-    boolean isDead() {
+    final boolean isDead() {
         return isUnused() && inSize() == 0 && type == null;
     }
 
@@ -124,5 +124,12 @@ public abstract class Node {
             node.unkeep();
         }
         return node;
+    }
+
+    public final boolean hasOnlyConstants() {
+        for (int i = 1; i < inSize(); i++) {
+            if (!in(i).type.isConstant()) return false;
+        }
+        return true;
     }
 }

@@ -106,7 +106,7 @@ public final class BytecodeEmitter {
             emitop4(const_, c);
             emitop2(putstatic, nextStatic++);
         }
-        emitop(const_m1);
+        emitop0(const_m1);
         emitop2(putstatic, nextStatic++);
         emitop4(const_, method.getAddress());
         emitop2(invokevirtual, nextStatic++);
@@ -149,7 +149,7 @@ public final class BytecodeEmitter {
     }
 
     public void emitCall(int address) {
-        emitop2(call, address - pc + 1);
+        emitop2(call, address - pc);
     }
 
     public Chain emitCall(Chain chain) {
@@ -168,7 +168,7 @@ public final class BytecodeEmitter {
     }
 
     public static int negate(int opcode) {
-        return jcc + inverse[opcode];
+        return ((opcode + 1) ^ 1) - 1;
     }
 
     public int emitJump(int opcode) {
@@ -232,6 +232,14 @@ public final class BytecodeEmitter {
 
     public int getDataSize() {
         return dataSize;
+    }
+
+    public static void reset() {
+        buf = new byte[buf.length];
+        pc = 0;
+        mainPc = -1;
+        dataSize = 0;
+        greska = false;
     }
 
     public static void write(OutputStream os) {

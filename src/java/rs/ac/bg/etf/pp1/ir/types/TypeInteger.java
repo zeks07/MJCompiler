@@ -35,7 +35,7 @@ public final class TypeInteger extends IRType {
     }
 
     @Override
-    public IRType meet(IRType other) {
+    public IRType meetSameType(IRType other) {
         if (this == other) return this;
         if (!(other instanceof TypeInteger)) return super.meet(other);
 

@@ -59,8 +59,8 @@ public final class CodeGenerator extends VisitorAdaptor {
             return;
         }
 
-        int pc = code.entryPoint();
-        method.setAddress(pc);
+        method.setAddress(code.entryPoint());
+        code.emitop2(enter, (method.getLevel() << 8) | (method.getLocalSymbols().size() & 0xFF));
         generateStatement(node);
 
         if (!code.isAlive()) {
@@ -69,6 +69,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         }
 
         if (method.getSymbolType().getMJKind().isVoid()) {
+            code.emitop0(exit);
             code.emitop0(return_);
         } else {
             // live code at the end of a method that expects return value.
@@ -113,10 +114,10 @@ public final class CodeGenerator extends VisitorAdaptor {
     @Override
     public void visit(MJSimpleName node) {
         Symbol symbol = node.expressionvalue.getSymbol();
-        if (symbol.isStatic()) {
-            result = items.makeStaticItem(symbol);
-        } else if (symbol.getMJKind().isConstant()) {
+        if (symbol.getMJKind().isConstant()) {
             result = items.makeImmediateItem(symbol.getAddress());
+        } else if (symbol.isStatic()) {
+            result = items.makeStaticItem(symbol);
         } else if (symbol.isMember()) {
             result = items.makeMemberItem(symbol);
         } else {
@@ -142,6 +143,32 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     @Override
+    public void visit(MJAssignmentStatementExpression node) {
+        generateExpression(node.getAssignment());
+        result.drop();
+    }
+
+    @Override
+    public void visit(MJPostincrementStatementExpression node) {
+        generateStatement(node.getPostincrement_expression());
+        result.drop();
+    }
+
+    @Override
+    public void visit(MJPostdecrementStatementExpression node) {
+        generateStatement(node.getPostdecrement_expression());
+        result.drop();
+    }
+
+    @Override
+    public void visit(MJMethodInvocationStatementExpression node) {
+        generateStatement(node.getMethod_invocation());
+        if (result.typecode != voidCode) {
+            result.drop();
+        }
+    }
+
+    @Override
     public void visit(MJIfThen node) {
         generateIf(node.getIf_condition(), node.getStatement(), null);
     }
@@ -157,15 +184,25 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     private void generateIf(SyntaxNode condition, SyntaxNode thenBranch, SyntaxNode elseBranch) {
-        Chain thenExit = null;
         ConditionalItem conditional = generateConditional(condition);
 
-        Chain elseChain = conditional.jumpFalse();
-        if (!conditional.isFalse()) {
-            code.resolve(conditional.trueJumps);
+        if (conditional.isTrue()) {
             generateStatement(thenBranch);
-            thenExit = code.branch(jmp);
+            return;
         }
+
+        if (conditional.isFalse()) {
+            if (elseBranch != null) {
+                generateStatement(elseBranch);
+            }
+            return;
+        }
+
+        Chain elseChain = conditional.jumpFalse();
+
+        code.resolve(conditional.trueJumps);
+        generateStatement(thenBranch);
+        Chain thenExit = code.branch(jmp);
 
         if (elseChain != null) {
             code.resolve(elseChain);
@@ -242,6 +279,9 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     private void generateLoop(SyntaxNode body, SyntaxNode condition, SyntaxNode step) {
+        GeneratorContext old = info;
+        info = new GeneratorContext();
+
         int start = code.entryPoint();
         ConditionalItem conditional;
         if (condition != null) {
@@ -256,6 +296,8 @@ public final class CodeGenerator extends VisitorAdaptor {
         generateStatement(step);
         code.resolve(code.branch(jmp), start);
         code.resolve(loopDone);
+
+        info = old;
     }
 
     @Override
@@ -273,6 +315,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         if (node.getExpression_opt() instanceof MJExpressionOption) {
             generateExpression(node.getExpression_opt()).load();
         }
+        code.emitop0(exit);
         code.emitop0(return_);
     }
 
@@ -291,6 +334,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         Type type = node.expressionvalue.getType();
         int fieldCount = type.getFieldCount();
         code.emitop2(new_, fieldCount);
+        result = items.makeStackItem(type);
     }
 
     @Override
@@ -298,6 +342,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         Type arrayType = node.expressionvalue.getType().getElementType();
         generateExpression(node.getExpression()).load();
         code.emitop1(newarray, arrayType == BuiltIn.CHAR ? 1 : 0);
+        result = items.makeStackItem(arrayType);
     }
 
     @Override
@@ -336,6 +381,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJRead node) {
         Item item = generateExpression(node.getExpression()).load(); // generate argument
         code.emitop0(getInstruction(item.typecode, read));
+        result = items.makeVoidItem();
     }
 
     @Override
@@ -343,6 +389,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         Item item = generateExpression(node.getExpression()).load();
         items.makeImmediateItem(1).load();
         code.emitop0(getInstruction(item.typecode, print));
+        result = items.makeVoidItem();
     }
 
     @Override
@@ -350,6 +397,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         Item item = generateExpression(node.getExpression()).load();
         items.makeImmediateItem(node.getI2()).load();
         code.emitop0(getInstruction(item.typecode, print));
+        result = items.makeVoidItem();
     }
 
     private static int getInstruction(int typecode, int base) {
@@ -379,6 +427,12 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJArgument node) {
+        generateExpression(node.getExpression()).load();
+    }
+
+    @Override
+    public void visit(MJNextArgument node) {
+        node.getArgument_list().accept(this);
         generateExpression(node.getExpression()).load();
     }
 
@@ -475,31 +529,38 @@ public final class CodeGenerator extends VisitorAdaptor {
             SyntaxNode right,
             int opcode
     ) {
-        Item leftItem = generateExpression(left);
-        Item rightItem = generateExpression(right);
         if (opcode >= ifeq && opcode <= ifle) {
-            if (leftItem instanceof ImmediateItem && rightItem instanceof ImmediateItem) {
-                int leftValue = ((ImmediateItem) leftItem).value;
-                int rightValue = ((ImmediateItem) rightItem).value;
-                return evaluate(leftValue, rightValue, opcode)
-                        ? items.makeConditionalItem(jmp, code.branch(jmp), null)
-                        : items.makeConditionalItem(jmp, null, code.branch(jmp));
-            }
-            leftItem.load();
-            rightItem.load();
-            return items.makeConditionalItem(jmp, code.branch(jmp), null);
+            generateExpression(left).load();
+            generateExpression(right).load();
+            return items.makeConditionalItem(opcode, true);
         } else if (opcode >= add && opcode <= rem) {
-            if (leftItem instanceof ImmediateItem && rightItem instanceof ImmediateItem) {
+            if (isConstant(left) && isConstant(right)) {
+                Item leftItem = generateExpression(left);
+                Item rightItem = generateExpression(right);
                 int leftValue = ((ImmediateItem) leftItem).value;
                 int rightValue = ((ImmediateItem) rightItem).value;
                 return items.makeImmediateItem(calculate(leftValue, rightValue, opcode));
             }
-            leftItem.load();
-            rightItem.load();
+            generateExpression(left).load();
+            generateExpression(right).load();
             code.emitop0(opcode);
             return items.makeStackItem(BuiltIn.INT);
         } else {
             throw new AssertionError("Unexpected opcode: " + opcode);
+        }
+    }
+
+    private static boolean isConstant(SyntaxNode node) {
+        if (node instanceof Multiplicative_expression) {
+            return ((Multiplicative_expression) node).expressionvalue.isConstant();
+        } else if (node instanceof Additive_expression) {
+            return ((Additive_expression) node).expressionvalue.isConstant();
+        } else if (node instanceof Relational_expression) {
+            return ((Relational_expression) node).expressionvalue.isConstant();
+        } else if (node instanceof Equaliity_expression) {
+            return ((Equaliity_expression) node).expressionvalue.isConstant();
+        } else {
+            return false;
         }
     }
 
@@ -536,7 +597,8 @@ public final class CodeGenerator extends VisitorAdaptor {
             result = items.makeConditionalItem(
                     right.opcode,
                     right.trueJumps,
-                    mergeChains(falseJumps, right.falseJumps)
+                    mergeChains(falseJumps, right.falseJumps),
+                    true
             );
         } else {
             result = left;
@@ -553,7 +615,8 @@ public final class CodeGenerator extends VisitorAdaptor {
             result = items.makeConditionalItem(
                     right.opcode,
                     mergeChains(trueJumps, right.trueJumps),
-                    right.falseJumps
+                    right.falseJumps,
+                    true
             );
         } else {
             result = left;
@@ -562,11 +625,12 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJTernaryOperation node) {
+        SyntaxNode conditional = node.getConditional_or_expression();
         SyntaxNode trueBranch = node.getExpression();
         SyntaxNode falseBranch = node.getConditional_expression();
 
         Chain thenExit = null;
-        ConditionalItem condition = generateConditional(node);
+        ConditionalItem condition = generateConditional(conditional);
         Chain elseChain = condition.jumpFalse();
 
         if (!condition.isTrue()) {
@@ -686,6 +750,11 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJFirstBlockStatement node) {
+        node.childrenAccept(this);
+    }
+
+    @Override
+    public void visit(MJNextBlockStatement node) {
         node.childrenAccept(this);
     }
 
@@ -826,26 +895,6 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     @Override
-    public void visit(MJAssignmentStatementExpression node) {
-        generateExpression(node.getAssignment());
-    }
-
-    @Override
-    public void visit(MJPostincrementStatementExpression node) {
-        generateStatement(node.getPostincrement_expression());
-    }
-
-    @Override
-    public void visit(MJPostdecrementStatementExpression node) {
-        generateStatement(node.getPostdecrement_expression());
-    }
-
-    @Override
-    public void visit(MJMethodInvocationStatementExpression node) {
-        generateStatement(node.getMethod_invocation());
-    }
-
-    @Override
     public void visit(MJClassInstanceCreationStatementExpression node) {
         generateStatement(node.getClass_instance_creation_expression());
     }
@@ -887,11 +936,6 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJArgumentList node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextArgument node) {
         node.childrenAccept(this);
     }
 

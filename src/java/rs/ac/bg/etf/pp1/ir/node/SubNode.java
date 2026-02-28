@@ -21,6 +21,18 @@ public final class SubNode extends BinaryNode {
 
     @Override
     public Node idealize() {
+        Node left = left();
+        IRType rightType = right().type;
+
+        // Subtraction by 0
+        if (rightType instanceof TypeInteger && ((TypeInteger) rightType).value() == 0)
+            return left;
+
         return null;
+    }
+
+    @Override
+    Node copy(Node left, Node right) {
+        return new SubNode(left, right);
     }
 }

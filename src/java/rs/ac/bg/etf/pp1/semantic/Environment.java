@@ -122,7 +122,11 @@ public final class Environment {
     }
 
     public Symbol declareVariable(DeclaratorInfo info, SyntaxNode node) {
-        SymbolKind kind = info.hasInitializer ? SymbolKind.CONSTANT : SymbolKind.VARIABLE;
+        SymbolKind kind = context.outer instanceof ScopeContext.ClassDeclarationContext
+                ? SymbolKind.FIELD
+                : info.hasInitializer
+                    ? SymbolKind.CONSTANT
+                    : SymbolKind.VARIABLE;
         Symbol variable = insert(kind, info.name, info.type, node);
 
         if (!context.isConstant) {

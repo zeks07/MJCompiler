@@ -35,4 +35,9 @@ public final class MulNode extends BinaryNode {
 
         return null;
     }
+
+    @Override
+    Node copy(Node left, Node right) {
+        return new MulNode(left, right);
+    }
 }

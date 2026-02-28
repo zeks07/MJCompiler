@@ -92,4 +92,8 @@ public final class SymbolTable {
     public void dump(SymbolTableVisitor visitor) {
         Tab.dump(visitor);
     }
+
+    public static void reset() {
+        Tab.closeScope();
+    }
 }

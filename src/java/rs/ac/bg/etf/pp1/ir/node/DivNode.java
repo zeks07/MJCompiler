@@ -18,7 +18,7 @@ public final class DivNode extends BinaryNode {
                 long rightValue = ((TypeInteger) right().type).value();
 
                 if (rightValue == 0) {
-                    // TODO
+                    return TypeInteger.ZERO;
                 }
                 return TypeInteger.constant(leftValue / rightValue);
             }
@@ -33,5 +33,10 @@ public final class DivNode extends BinaryNode {
         if (right.type.isConstant() && right.type instanceof TypeInteger && ((TypeInteger) right.type).value() == 1)
             return left();
         return null;
+    }
+
+    @Override
+    Node copy(Node left, Node right) {
+        return new DivNode(left, right);
     }
 }

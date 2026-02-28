@@ -6,12 +6,8 @@ import rs.ac.bg.etf.pp1.ast.MJProgram;
 import rs.ac.bg.etf.pp1.ast.Program;
 import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
 import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
-import rs.ac.bg.etf.pp1.semantic.Environment;
-import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.semantic.SemanticAnalyser;
-import rs.ac.bg.etf.pp1.semantic.DumpSymbolTableVisitor;
 import rs.ac.bg.etf.pp1.symbols.BuiltIn;
-import rs.ac.bg.etf.pp1.symbols.SymbolTable;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.etf.pp1.mj.runtime.disasm;
 import rs.etf.pp1.symboltable.Tab;
@@ -23,7 +19,7 @@ import java.nio.file.Paths;
 
 public final class Compiler {
     public static void main(String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             System.err.println("Usage: java Compiler <source file>");
             System.exit(1);
         }
@@ -86,7 +82,9 @@ public final class Compiler {
         CodeGenerator generator = new CodeGenerator(context);
         generator.generateProgram((MJProgram) program);
 
-        Path output = Paths.get(file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3) + ".obj");
+        String fileName = file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3);
+        Path output = Paths.get(fileName + ".obj");
+
         try (OutputStream os = Files.newOutputStream(output)) {
             BytecodeEmitter.write(os);
         } catch (IOException e) {
