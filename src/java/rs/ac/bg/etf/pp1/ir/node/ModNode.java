@@ -1,12 +1,11 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
-
 import rs.ac.bg.etf.pp1.ir.types.Type;
-import rs.ac.bg.etf.pp1.ir.types.Types;
 import rs.ac.bg.etf.pp1.ir.types.TypeInteger;
+import rs.ac.bg.etf.pp1.ir.types.Types;
 
-public final class DivNode extends BinaryNode {
-    public DivNode(Node left, Node right) {
+public final class ModNode extends BinaryNode {
+    public ModNode(Node left, Node right) {
         super(left, right);
     }
 
@@ -21,20 +20,27 @@ public final class DivNode extends BinaryNode {
         if (rightValue == 0)
             return TypeInteger.ZERO;
 
-        return TypeInteger.constant(leftValue / rightValue);
+        return TypeInteger.constant(leftValue % rightValue);
     }
 
     @Override
     public Node idealize() {
         Node right = right();
-        // Division by 1
-        if (right.type.isConstant() && right.type instanceof TypeInteger && ((TypeInteger) right.type).value() == 1)
+
+        if (!right.type.isConstant() || !(right.type instanceof TypeInteger))
+            return null;
+
+        TypeInteger rightInt = (TypeInteger) right.type;
+
+        // Modulo by 1
+        if (rightInt.value() == 1)
             return left();
+
         return null;
     }
 
     @Override
     Node copy(Node left, Node right) {
-        return new DivNode(left, right);
+        return new ModNode(left, right);
     }
 }

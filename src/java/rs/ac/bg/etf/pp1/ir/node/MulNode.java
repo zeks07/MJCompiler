@@ -11,12 +11,13 @@ public final class MulNode extends BinaryNode {
 
     @Override
     public Type compute() {
-        if (left().type instanceof TypeInteger && right().type instanceof TypeInteger) {
-            if (left().type.isConstant() && right().type.isConstant()) {
-                return TypeInteger.constant(((TypeInteger) left().type).value() * ((TypeInteger) right().type).value());
-            }
-        }
-        return Types.BOTTOM;
+        if (!computable())
+            return Types.BOTTOM;
+
+        long leftValue = ((TypeInteger) left().type).value();
+        long rightValue = ((TypeInteger) right().type).value();
+
+        return TypeInteger.constant(leftValue * rightValue);
     }
 
     @Override

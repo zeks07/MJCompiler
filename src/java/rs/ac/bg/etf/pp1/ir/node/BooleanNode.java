@@ -11,13 +11,18 @@ public abstract class BooleanNode extends BinaryNode {
 
     @Override
     public Type compute() {
-        if (left().type instanceof TypeInteger && right().type instanceof TypeInteger) {
-            if (left().type.isConstant() && right().type.isConstant()) {
-                return TypeInteger.constant(doOperation(((TypeInteger) left().type).value(), ((TypeInteger) right().type).value()) ? 1 : 0);
-            }
+        if (!(left().type instanceof TypeInteger) || !(right().type instanceof TypeInteger)) {
+            return Types.BOTTOM;
+        }
+
+        if (!left().type.isConstant() || !right().type.isConstant()) {
             return left().type.meet(right().type);
         }
-        return Types.BOTTOM;
+
+        long leftValue = ((TypeInteger) left().type).value();
+        long rightValue = ((TypeInteger) right().type).value();
+
+        return TypeInteger.constant(doOperation(leftValue, rightValue) ? 1 : 0);
     }
 
     abstract boolean doOperation(long left, long right);

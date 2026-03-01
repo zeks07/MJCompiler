@@ -15,12 +15,13 @@ public final class NegNode extends Node {
 
     @Override
     public Type compute() {
-        if (operand().type instanceof TypeInteger) {
-            return operand().type.isConstant()
-                    ? TypeInteger.constant(-((TypeInteger) operand().type).value())
-                    : operand().type;
+        if (!(operand().type instanceof TypeInteger)) {
+            return TypeInteger.TOP.meet(operand().type);
         }
-        return TypeInteger.TOP.meet(operand().type);
+
+        return operand().type.isConstant()
+                ? TypeInteger.constant(-((TypeInteger) operand().type).value())
+                : operand().type;
     }
 
     @Override

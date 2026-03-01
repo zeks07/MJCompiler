@@ -1,5 +1,7 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
+import rs.ac.bg.etf.pp1.ir.types.TypeInteger;
+
 public abstract class BinaryNode extends Node {
     public BinaryNode(Node left, Node right) {
         super(null, left, right);
@@ -52,5 +54,15 @@ public abstract class BinaryNode extends Node {
 
     private static PhiNode phiOfConstants(Node node) {
         return node instanceof PhiNode && node.hasOnlyConstants() ? (PhiNode) node : null;
+    }
+
+    protected boolean computable() {
+        if (!(left().type instanceof TypeInteger) || !(right().type instanceof TypeInteger))
+            return false;
+
+        if (!left().type.isConstant() || !right().type.isConstant())
+            return false;
+
+        return true;
     }
 }

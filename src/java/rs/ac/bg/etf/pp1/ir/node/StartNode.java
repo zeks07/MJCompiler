@@ -1,16 +1,24 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
 import rs.ac.bg.etf.pp1.ir.types.Type;
-import rs.ac.bg.etf.pp1.ir.types.Types;
 import rs.ac.bg.etf.pp1.ir.types.TypeTuple;
 
-public final class StartNode extends CFGNode {
+public final class StartNode extends MultiNode {
     final TypeTuple args;
 
     public StartNode(Type[] args) {
         super();
         this.args = TypeTuple.make(args);
         type = this.args;
+    }
+
+    public Node control() {
+        return in(0);
+    }
+
+    @Override
+    public boolean isCFG() {
+        return true;
     }
 
     @Override
