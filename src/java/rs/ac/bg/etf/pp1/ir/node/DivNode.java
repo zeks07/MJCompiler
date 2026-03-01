@@ -1,8 +1,8 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
 
-import rs.ac.bg.etf.pp1.ir.types.IRType;
-import rs.ac.bg.etf.pp1.ir.types.IRTypes;
+import rs.ac.bg.etf.pp1.ir.types.Type;
+import rs.ac.bg.etf.pp1.ir.types.Types;
 import rs.ac.bg.etf.pp1.ir.types.TypeInteger;
 
 public final class DivNode extends BinaryNode {
@@ -11,7 +11,7 @@ public final class DivNode extends BinaryNode {
     }
 
     @Override
-    public IRType compute() {
+    public Type compute() {
         if (left().type instanceof TypeInteger && right().type instanceof TypeInteger) {
             if (left().type.isConstant() && right().type.isConstant()) {
                 long leftValue = ((TypeInteger) left().type).value();
@@ -23,7 +23,7 @@ public final class DivNode extends BinaryNode {
                 return TypeInteger.constant(leftValue / rightValue);
             }
         }
-        return IRTypes.BOTTOM;
+        return Types.BOTTOM;
     }
 
     @Override

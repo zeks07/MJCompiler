@@ -1,16 +1,20 @@
 package rs.ac.bg.etf.pp1.ir.types;
 
-public final class TypeInteger extends IRType {
-    public final static TypeInteger TOP = new TypeInteger(false, 0);
-    public final static TypeInteger BOTTOM = new TypeInteger(false, 1);
-    public final static TypeInteger ZERO = new TypeInteger(true, 0);
+public final class TypeInteger extends Type {
+    public final static TypeInteger TOP = make(false, 0);
+    public final static TypeInteger BOTTOM = make(false, 1);
+    public final static TypeInteger ZERO = make(true, 0);
 
     private final boolean isConstant;
     private final long constant;
 
-    public TypeInteger(boolean isConstant, long constant) {
+    private TypeInteger(boolean isConstant, long constant) {
         this.isConstant = isConstant;
         this.constant = constant;
+    }
+
+    public static TypeInteger make(boolean isConstant, long constant) {
+        return new TypeInteger(isConstant, constant);
     }
 
     public static TypeInteger constant(long constant) {
@@ -35,7 +39,7 @@ public final class TypeInteger extends IRType {
     }
 
     @Override
-    public IRType meetSameType(IRType other) {
+    public Type meetSameType(Type other) {
         if (this == other) return this;
         if (!(other instanceof TypeInteger)) return super.meet(other);
 
@@ -50,9 +54,14 @@ public final class TypeInteger extends IRType {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof TypeInteger)) return false;
-        return constant == ((TypeInteger) obj).constant;
+    public Type dual() {
+        if (isConstant) return this;
+        return constant == 0 ? BOTTOM : TOP;
+    }
+
+    @Override
+    protected boolean eq(Type other) {
+        TypeInteger otherInt = (TypeInteger) other;
+        return constant == otherInt.constant && isConstant == otherInt.isConstant;
     }
 }

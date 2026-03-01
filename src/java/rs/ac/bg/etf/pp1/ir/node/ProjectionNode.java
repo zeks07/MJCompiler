@@ -1,7 +1,7 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
-import rs.ac.bg.etf.pp1.ir.types.IRType;
-import rs.ac.bg.etf.pp1.ir.types.IRTypes;
+import rs.ac.bg.etf.pp1.ir.types.Type;
+import rs.ac.bg.etf.pp1.ir.types.Types;
 import rs.ac.bg.etf.pp1.ir.types.TypeTuple;
 
 public final class ProjectionNode extends Node {
@@ -15,7 +15,7 @@ public final class ProjectionNode extends Node {
 
     @Override
     public boolean isCFG() {
-        return index == 0;
+        return index == 0 || control() instanceof IfNode;
     }
 
     public MultiNode control() {
@@ -23,13 +23,26 @@ public final class ProjectionNode extends Node {
     }
 
     @Override
-    public IRType compute() {
-        IRType type = control().type;
-        return type instanceof TypeTuple ? ((TypeTuple) type).types[index] : IRTypes.BOTTOM;
+    public Type compute() {
+        Type type = control().type;
+        return type instanceof TypeTuple ? ((TypeTuple) type).types[index] : Types.BOTTOM;
     }
 
     @Override
     public Node idealize() {
+        if (control().type instanceof TypeTuple && ((TypeTuple) control().type).types[1-index] == Types.X_CONTROL)
+            return control().in(0);
+
         return null;
+    }
+
+    @Override
+    boolean eq(Node node) {
+        return index == ((ProjectionNode) node).index;
+    }
+
+    @Override
+    protected int hash() {
+        return index;
     }
 }

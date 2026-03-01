@@ -1,16 +1,23 @@
 package rs.ac.bg.etf.pp1.ir.types;
 
-public final class TypeTuple extends IRType {
-    public static final TypeTuple IF = new TypeTuple(IRTypes.CONTROL, IRTypes.CONTROL);
+public final class TypeTuple extends Type {
+    public static final TypeTuple IF_BOTH = new TypeTuple(Types.CONTROL, Types.CONTROL);
+    public static final TypeTuple IF_NEITHER = new TypeTuple(Types.X_CONTROL, Types.X_CONTROL);
+    public static final TypeTuple IF_TRUE = new TypeTuple(Types.CONTROL, Types.X_CONTROL);
+    public static final TypeTuple IF_FALSE = new TypeTuple(Types.X_CONTROL, Types.CONTROL);
 
-    public final IRType[] types;
+    public final Type[] types;
 
-    public TypeTuple(IRType... types) {
+    private TypeTuple(Type... types) {
         this.types = types;
     }
 
+    public static TypeTuple make(Type... types) {
+        return new TypeTuple(types).intern();
+    }
+
     @Override
-    public IRType meetSameType(IRType other) {
+    public Type meetSameType(Type other) {
         throw new RuntimeException("Not implemented");
     }
 }

@@ -1,30 +1,30 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
-import rs.ac.bg.etf.pp1.ir.types.IRType;
-import rs.ac.bg.etf.pp1.ir.types.IRTypes;
+import rs.ac.bg.etf.pp1.ir.types.Type;
+import rs.ac.bg.etf.pp1.ir.types.Types;
 import rs.ac.bg.etf.pp1.ir.types.TypeInteger;
 
-public final class AddNode extends BinaryNode.Associative {
+public final class AddNode extends BinaryNode {
     public AddNode(Node left, Node right) {
         super(left, right);
     }
 
     @Override
-    public IRType compute() {
+    public Type compute() {
         if (left().type instanceof TypeInteger && right().type instanceof TypeInteger) {
             if (left().type.isConstant() && right().type.isConstant()) {
                 return TypeInteger.constant(((TypeInteger) left().type).value() + ((TypeInteger) right().type).value());
             }
         }
-        return IRTypes.BOTTOM;
+        return Types.BOTTOM;
     }
 
     @Override
     public Node idealize() {
         Node left = left();
         Node right = right();
-        IRType leftType = left().type;
-        IRType rightType = right().type;
+        Type leftType = left().type;
+        Type rightType = right().type;
 
         // Already handled by peephole constant folding
         assert !(leftType.isConstant() && rightType.isConstant());
@@ -58,37 +58,13 @@ public final class AddNode extends BinaryNode.Associative {
         if (((AddNode) left).right().type.isConstant() && rightType.isConstant())
             return new AddNode(((AddNode) left).left(), new AddNode(((AddNode) left).right(), right).peephole());
 
-        if (canPushConstantUp()) {
-            PhiNode phi = (PhiNode) left().in(2);
-
-            Node[] nodes = new Node[phi.inSize()];
-            nodes[0] = phi.region();
-
-            for (int i = 1; i < phi.inSize(); i++) {
-                nodes[i] = new AddNode(phi.in(i), rightType.isConstant() ? right : right.in(i)).peephole();
-            }
-
-            return new AddNode(left.in(1), new PhiNode(nodes).peephole());
-        }
+        Node phi = phiConstant(true);
+        if (phi != null) return phi;
 
         if (splineCompare(((AddNode) left).right(), right))
             return new AddNode(new AddNode(((AddNode) left).left(), right).peephole(), ((AddNode) left).right());
 
         return null;
-    }
-
-    private boolean canPushConstantUp() {
-        if (!(left().in(2) instanceof PhiNode)) return false;
-
-        PhiNode phi = (PhiNode) left().in(2);
-        if (!phi.hasOnlyConstants()) return false;
-
-        if (right().type.isConstant()) return true;
-
-        if (!(right() instanceof PhiNode)) return false;
-        PhiNode phiRight = (PhiNode) right();
-
-        return phi.region() == phiRight.region() && right().hasOnlyConstants();
     }
 
     /**
@@ -98,12 +74,15 @@ public final class AddNode extends BinaryNode.Associative {
      * If nothing is applicable, order by id.
      * @return true if low and high should swap.
      */
-    static boolean splineCompare(Node high, Node low) {
+    private boolean splineCompare(Node high, Node low) {
         if (low.type.isConstant()) return false;
         if (high.type.isConstant()) return true;
 
-        if (low instanceof PhiNode && low.hasOnlyConstants()) return false;
-        if (high instanceof PhiNode && high.hasOnlyConstants()) return true;
+        if (low instanceof PhiNode && ((PhiNode) low).region().type == Types.X_CONTROL) return false;
+        if (high instanceof PhiNode && ((PhiNode) high).region().type == Types.X_CONTROL) return true;
+
+        if (low instanceof PhiNode && low.hasOnlyConstants(this)) return false;
+        if (high instanceof PhiNode && high.hasOnlyConstants(this)) return true;
 
         if (low instanceof PhiNode && !(high instanceof PhiNode)) return true;
         if (high instanceof PhiNode && !(low instanceof PhiNode)) return false;

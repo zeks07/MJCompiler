@@ -1,8 +1,8 @@
 package rs.ac.bg.etf.pp1.ir.node;
 
 
-import rs.ac.bg.etf.pp1.ir.types.IRType;
-import rs.ac.bg.etf.pp1.ir.types.IRTypes;
+import rs.ac.bg.etf.pp1.ir.types.Type;
+import rs.ac.bg.etf.pp1.ir.types.Types;
 
 import java.util.HashMap;
 import java.util.Stack;
@@ -12,7 +12,7 @@ public final class ScopeNode extends Node {
 
     public ScopeNode() {
         scopes = new Stack<>();
-        type = IRTypes.BOTTOM;
+        type = Types.BOTTOM;
     }
 
     public Node control() {
@@ -24,8 +24,8 @@ public final class ScopeNode extends Node {
     }
 
     @Override
-    public IRType compute() {
-        return IRTypes.BOTTOM;
+    public Type compute() {
+        return Types.BOTTOM;
     }
 
     @Override
@@ -75,14 +75,25 @@ public final class ScopeNode extends Node {
     }
 
     public ScopeNode duplicate() {
+        return duplicate(false);
+    }
+
+    public ScopeNode duplicate(boolean inLoop) {
         ScopeNode duplicate = new ScopeNode();
         for (HashMap<String, Integer> symbols : scopes) {
             duplicate.scopes.push(new HashMap<>(symbols));
         }
+
         duplicate.addDefinition(control());
+
         for (int i = 1; i < inSize(); i++) {
-            duplicate.addDefinition(in(i));
+            if (!inLoop) duplicate.addDefinition(in(i));
+            else {
+                duplicate.addDefinition(new PhiNode(control(), in(i), null).peephole());
+                setDefinition(i, duplicate.in(i));
+            }
         }
+
         return duplicate;
     }
 
@@ -93,5 +104,20 @@ public final class ScopeNode extends Node {
         }
         other.kill();
         return region;
+    }
+
+    public void endLoop(ScopeNode back, ScopeNode exit) {
+        Node control = control();
+        assert control instanceof LoopNode && ((LoopNode) control).inProgress();
+        control.setDefinition(2, back.control());
+
+        for (int i = 1; i < inSize(); i++) {
+            PhiNode phi = (PhiNode) in(i);
+            assert phi.region() == control && phi.in(2) == null;
+            phi.setDefinition(2, back.in(i));
+            Node in = phi.peephole();
+            if (in != phi) phi.subsume(in);
+        }
+        back.kill();;
     }
 }
