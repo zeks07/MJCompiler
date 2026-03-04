@@ -89,30 +89,30 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
         @Override
         public void visit(MJConstLiteral node) {
-            node.type = node.getConst_literal().type;
+            node.expressionvalue = node.getConst_literal().expressionvalue;
         }
 
         @Override
         public void visit(MJNullLiteral node) {
-            node.type = BuiltIn.VOID;
+            node.expressionvalue = new ExpressionValue(BuiltIn.NULL);
         }
 
         @Override
         public void visit(MJIntegerLiteral node) {
             value = node.getI1();
-            node.type = BuiltIn.INT;
+            node.expressionvalue = new ExpressionValue(BuiltIn.INT);
         }
 
         @Override
         public void visit(MJBooleanLiteral node) {
             value = node.getB1();
-            node.type = BuiltIn.BOOLEAN;
+            node.expressionvalue = new ExpressionValue(BuiltIn.BOOLEAN);
         }
 
         @Override
         public void visit(MJCharacterLiteral node) {
             value = node.getC1();
-            node.type = BuiltIn.CHAR;
+            node.expressionvalue = new ExpressionValue(BuiltIn.CHAR);
         }
 
         public int value() {
@@ -125,7 +125,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
         public void visit(MJType node) {
             String name = node.getI1();
             Symbol type = environment.findType(name, node);
-            node.type = type.getSymbolType();
+            node.expressionvalue = new ExpressionValue(type);
         }
     }
 
@@ -150,7 +150,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
             MJType typeNode = node.getMJType();
             typeNode.accept(typeVisitor);
-            environment.setType(typeNode.type, node);
+            environment.setType(typeNode.expressionvalue.getType(), node);
 
             node.getVariable_declarators().traverseBottomUp(variableDeclarationVisitor);
 
@@ -224,7 +224,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
         public void visit(MJSuper node) {
             MJType typeNode = node.getMJType();
             typeNode.accept(typeVisitor);
-            environment.setType(typeNode.type, node);
+            environment.setType(typeNode.expressionvalue.getType(), node);
         }
 
         @Override
@@ -278,7 +278,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
             MJType typeNode = node.getMJType();
             typeNode.accept(typeVisitor);
-            environment.setType(typeNode.type, node);
+            environment.setType(typeNode.expressionvalue.getType(), node);
 
             String name = node.getI3();
             environment.declareMethod(name, node);
@@ -670,7 +670,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
         public void visit(MJPrimaryLiteral node) {
             Literal literal = node.getLiteral();
             literal.traverseBottomUp(new LiteralVisitor());
-            node.expressionvalue = new ExpressionValue(literal.type, true);
+            node.expressionvalue = new ExpressionValue(literal.expressionvalue.getType(), true);
         }
 
         @Override
@@ -708,8 +708,10 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
         @Override
         public void visit(MJClassInstanceCreation node) {
-            String name = node.getMJType().getI1();
-            node.expressionvalue = new ExpressionValue(environment.requireClassType(name, node.getMJType()));
+            node.getMJType().accept(typeVisitor);
+            Symbol clazz = node.getMJType().expressionvalue.getSymbol();
+            environment.requireClass(clazz, node);
+            node.expressionvalue = new ExpressionValue(clazz);
         }
 
         @Override
@@ -756,7 +758,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             expression.accept(expressionVisitor);
 
             node.expressionvalue = new ExpressionValue(
-                    environment.requireArray(type.type, expression.expressionvalue.getType(), node)
+                    environment.requireArray(type.expressionvalue.getType(), expression.expressionvalue.getType(), node)
             );
         }
 
@@ -792,7 +794,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
             environment.requireMethodInvocation(method, expressionValue, node);
 
-            node.expressionvalue = new ExpressionValue(method.getSymbolType());
+            node.expressionvalue = new ExpressionValue(method);
         }
 
         @Override
@@ -810,7 +812,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
 
             environment.requireMethodInvocation(method, expressionValue, node);
 
-            node.expressionvalue = new ExpressionValue(method.getSymbolType());
+            node.expressionvalue = new ExpressionValue(method);
         }
 
         @Override

@@ -1,13 +1,13 @@
 package rs.ac.bg.etf.pp1.logger;
 
 import rs.ac.bg.etf.pp1.util.Context;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics.Diagnostic;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class CompilerLogger {
 
@@ -26,27 +26,18 @@ public class CompilerLogger {
         context.put(loggerKey, this);
     }
 
-    public void log(LogLevel level, String message, int line) {
-        String format = "[" + level + "]" + (line >= 0 ? " at line " + line : "") + ": " + message;
-
+    public void render(Diagnostic diagnostic) {
+        String format = "[" + diagnostic.getLevel() + "]"
+                + (diagnostic.getLine() >= 0 ? " at line " + diagnostic.getLine() : "")
+                + ": " + diagnostic.getMessage();
         messages.add(format);
         System.err.println(format);
     }
 
-    public void info(String message, int line) {
-        log(LogLevel.INFO, message, line);
-    }
-
-    public void warning(String message, int line) {
-        log(LogLevel.WARNING, message, line);
-    }
-
-    public void error(String message, int line) {
-        log(LogLevel.ERROR, message, line);
-    }
-
-    public void error(String message) {
-        log(LogLevel.ERROR, message, -1);
+    public void renderAll(List<Diagnostic> diagnostics) {
+        for (Diagnostic diagnostic : diagnostics) {
+            render(diagnostic);
+        }
     }
 
     public void writeToFile(Path file) throws IOException {

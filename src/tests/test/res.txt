@@ -1,0 +1,295 @@
+C:\Users\zeljk\.jdks\temurin-1.8.0_482\bin\java.exe "-javaagent:C:\Users\zeljk\AppData\Local\Programs\IntelliJ IDEA Ultimate\lib\idea_rt.jar=58090" -Dfile.encoding=UTF-8 -classpath C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\charsets.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\access-bridge-64.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\cldrdata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\dnsns.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\jaccess.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\localedata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\nashorn.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunec.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunjce_provider.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunmscapi.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunpkcs11.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\zipfs.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jce.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jfr.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jsse.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\management-agent.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\resources.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\rt.jar;C:\Users\zeljk\Projects\2026\MJCompiler\out\production\MJCompiler;C:\Users\zeljk\Projects\2026\MJCompiler\lib\cup_v10k.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\JFlex.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
+codeSize=675
+dataSize=28
+mainPC=97
+// chr
+0: enter 1 1
+3: load_0
+4: exit
+5: return
+// ord
+6: enter 1 1
+9: load_0
+10: exit
+11: return
+// Node.inc
+12: enter 2 2
+15: load_1
+16: const_3
+17: add
+18: exit
+19: return
+// Node.set
+20: enter 2 2
+23: load_0
+24: load_1
+25: putfield 1
+28: exit
+29: return
+// AdvancedNode.inc
+30: enter 2 2
+33: load_1
+34: const_3
+35: add
+36: load_0
+37: getfield 3
+40: add
+41: exit
+42: return
+// AdvancedNode.link
+43: enter 2 2
+46: load_0
+47: load_1
+48: putfield 2
+51: exit
+52: return
+// helper
+53: enter 2 3
+56: const_0
+57: store_2
+58: load_2
+59: load_0
+60: load_1
+61: add
+62: jge 33 (=95)
+65: load_2
+66: const_2
+67: rem
+68: const_0
+69: jne 9 (=78)
+72: load_2
+73: const_1
+74: print
+75: jmp 12 (=87)
+78: load_2
+79: const 100
+84: add
+85: const_1
+86: print
+87: load_2
+88: inc 2,1
+91: pop
+92: jmp -34 (=58)
+95: exit
+96: return
+// main
+97: enter 0 7
+100: const 105
+105: putstatic 0
+108: const 110
+113: putstatic 1
+116: const 99
+121: putstatic 2
+124: const_m1
+125: putstatic 3
+128: const 12
+133: putstatic 4
+136: const 115
+141: putstatic 5
+144: const 101
+149: putstatic 6
+152: const 116
+157: putstatic 7
+160: const_m1
+161: putstatic 8
+164: const 20
+169: putstatic 9
+172: const -2
+177: putstatic 10
+180: const 105
+185: putstatic 11
+188: const 110
+193: putstatic 12
+196: const 99
+201: putstatic 13
+204: const_m1
+205: putstatic 14
+208: const 30
+213: putstatic 15
+216: const 108
+221: putstatic 16
+224: const 105
+229: putstatic 17
+232: const 110
+237: putstatic 18
+240: const 107
+245: putstatic 19
+248: const_m1
+249: putstatic 20
+252: const 43
+257: putstatic 21
+260: const 115
+265: putstatic 22
+268: const 101
+273: putstatic 23
+276: const 116
+281: putstatic 24
+284: const_m1
+285: putstatic 25
+288: const 20
+293: putstatic 26
+296: const -2
+301: putstatic 27
+304: const_0
+305: store_2
+306: const_0
+307: store_3
+308: const_5
+309: newarray 0
+311: store 6
+313: new 3
+316: dup
+317: const 11
+322: putfield 0
+325: store 5
+327: new 2
+330: dup
+331: const_0
+332: putfield 0
+335: store 4
+337: load_0
+338: const_1
+339: load 4
+341: getfield 0
+344: invokevirtual set
+361: load_0
+362: const_2
+363: load 5
+365: getfield 0
+368: invokevirtual set
+385: load 5
+387: const_5
+388: putfield 3
+391: load 4
+393: load 5
+395: putfield 2
+398: load_0
+399: new 2
+402: dup
+403: const_0
+404: putfield 0
+407: load 5
+409: getfield 0
+412: invokevirtual link
+433: const_0
+434: store_0
+435: load_0
+436: const_5
+437: jge 25 (=462)
+440: load 6
+442: load_0
+443: load_0
+444: const_3
+445: mul
+446: astore
+447: load_2
+448: load 6
+450: load_0
+451: aload
+452: add
+453: store_2
+454: load_0
+455: inc 0,1
+458: pop
+459: jmp -24 (=435)
+462: load_0
+463: load_2
+464: load 5
+466: getfield 0
+469: invokevirtual inc
+486: load_0
+487: const_2
+488: load 4
+490: getfield 0
+493: invokevirtual inc
+510: jle 13 (=523)
+513: load_2
+514: const_0
+515: jeq 8 (=523)
+518: const_1
+519: store_3
+520: jmp 5 (=525)
+523: const_0
+524: store_3
+525: load_2
+526: const_4
+527: rem
+528: dup
+529: const_0
+530: jeq 21 (=551)
+533: dup
+534: const_1
+535: jeq 20 (=555)
+538: dup
+539: const_2
+540: jeq 22 (=562)
+543: dup
+544: const_3
+545: jeq 21 (=566)
+548: jmp 22 (=570)
+551: load_2
+552: const_1
+553: add
+554: store_2
+555: load_2
+556: const_2
+557: add
+558: store_2
+559: jmp 11 (=570)
+562: load_2
+563: const_3
+564: add
+565: store_2
+566: load_2
+567: const_4
+568: add
+569: store_2
+570: pop
+571: load_0
+572: load_0
+573: const_3
+574: load 4
+576: getfield 0
+579: invokevirtual inc
+596: load 4
+598: getfield 2
+601: getfield 0
+604: invokevirtual set
+621: const_0
+622: store_0
+623: load_0
+624: const_3
+625: jge 32 (=657)
+628: const_0
+629: store_1
+630: load_1
+631: const_2
+632: jge 17 (=649)
+635: load_2
+636: load_0
+637: add
+638: load_1
+639: add
+640: store_2
+641: load_1
+642: inc 1,1
+645: pop
+646: jmp -16 (=630)
+649: load_0
+650: inc 0,1
+653: pop
+654: jmp -31 (=623)
+657: load_3
+658: const_0
+659: jeq 11 (=670)
+662: load_2
+663: const_3
+664: call -611 (=53)
+667: jmp 6 (=673)
+670: load_2
+671: const_1
+672: print
+673: exit
+674: return
+
+Process finished with exit code 0

@@ -183,6 +183,7 @@ public interface Symbol {
         private Symbol owner;
         private final SyntaxNode node;
         private boolean defined = false;
+        private boolean inherited = false;
         public BytecodeEmitter.Chain forwardReference = null;
 
         public MethodSymbol(String name, Type returnType, SyntaxNode node) {
@@ -275,6 +276,10 @@ public interface Symbol {
 
         public boolean isDefined() {
             return defined;
+        }
+
+        public Symbol getOwner() {
+            return owner;
         }
 
         @Override

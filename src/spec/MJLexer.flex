@@ -1,7 +1,9 @@
 package rs.ac.bg.etf.pp1;
 
 import java_cup.runtime.*;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.sym;
+import rs.ac.bg.etf.pp1.util.Context;
 
 %%
 
@@ -17,17 +19,24 @@ import rs.ac.bg.etf.pp1.sym;
 %cup
 
 %{
-  private Symbol symbol(int type) {
-    return new Symbol(type, yyline+1, yycolumn+1);
-  }
+    private CompilerDiagnostics diagnostics;
 
-  private Symbol symbol(int type, Object value) {
-    return new Symbol(type, yyline+1, yycolumn+1, value);
-  }
+    public MJScanner(java.io.Reader in, Context context) {
+        this(in);
+        this.diagnostics = CompilerDiagnostics.getInstance(context);
+    }
 
-  private void report_error() {
-      System.err.println("Lexical error at line " + (yyline + 1) + ":" + (yycolumn + 1) + ": " + yytext());
-  }
+    private Symbol symbol(int type) {
+        return new Symbol(type, yyline+1, yycolumn+1);
+    }
+
+    private Symbol symbol(int type, Object value) {
+        return new Symbol(type, yyline+1, yycolumn+1, value);
+    }
+
+    private void report_error() {
+        diagnostics.reportError("Lexical error at line " + (yyline + 1) + ":" + (yycolumn + 1) + ": " + yytext());
+    }
 %}
 
 LineTerminator = \r|\n|\r\n

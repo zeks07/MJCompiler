@@ -8,6 +8,7 @@ import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.Type;
 import rs.ac.bg.etf.pp1.util.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
@@ -16,6 +17,8 @@ import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
 public final class CodeGenerator extends VisitorAdaptor {
     private final BytecodeEmitter code;
     private final Items items;
+    private List<ClassSymbol> classes;
+    private ClassSymbol currentClass;
 
     private Item result;
 
@@ -26,13 +29,14 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     public void generateProgram(MJProgram node) {
         ProgramSymbol program = node.programsymbol;
-        List<ClassSymbol> classes = program.getClasses();
+        classes = program.getClasses();
         List<MethodSymbol> methods = program.getMethods();
         int staticFieldCount = program.getStaticFieldCount();
 
-        code.setDataSize(staticFieldCount);
+        code.setStaticFieldCount(staticFieldCount);
 
         for (ClassSymbol clazz : classes) {
+            currentClass = clazz;
             if (!clazz.getSymbolType().getMJKind().isClass()) continue;
 
             List<MethodSymbol> classMethods = clazz.getMethods();
@@ -42,25 +46,35 @@ public final class CodeGenerator extends VisitorAdaptor {
             }
         }
 
+        currentClass = null;
+
         for (MethodSymbol method : methods) {
-            String name = method.getName();
-            if (name.equals("main")) {
-                generateVFT(classes);
-                code.setMain();
-            }
             generateMethod(method);
         }
+
+        code.setDataSize();
     }
 
     private void generateMethod(MethodSymbol method) {
+        if (method.getOwner() != currentClass && currentClass != null)
+            return;
+
         Method_body node = (Method_body) method.getNode();
 
         if (node instanceof MJAbstractMethodBody) {
             return;
         }
 
-        method.setAddress(code.entryPoint());
+        int entry = code.entryPoint();
+        method.setAddress(entry);
         code.emitop2(enter, (method.getLevel() << 8) | (method.getLocalSymbols().size() & 0xFF));
+
+        String name = method.getName();
+        if (name.equals("main")) {
+            generateVFT(classes);
+            code.setMain(entry);
+        }
+
         generateStatement(node);
 
         if (!code.isAlive()) {
@@ -79,15 +93,15 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     private void generateVFT(List<ClassSymbol> classes) {
-        int nextStatic = code.getDataSize();
         for (ClassSymbol clazz : classes) {
+            clazz.setAddress(code.getNextStatic());
             List<MethodSymbol> methods = clazz.getMethods();
             if (methods.isEmpty()) continue;
 
             for (MethodSymbol method : methods) {
-                nextStatic = code.emitVirtualFunction(method, nextStatic);
+                code.emitVirtualFunction(method);
             }
-            nextStatic = code.emitVFTEntryEnd(nextStatic);
+            code.emitVFTEntryEnd();
         }
     }
 
@@ -119,6 +133,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         } else if (symbol.isStatic()) {
             result = items.makeStaticItem(symbol);
         } else if (symbol.isMember()) {
+            items.makeThisItem().load();
             result = items.makeMemberItem(symbol);
         } else {
             result = items.makeLocalItem(symbol);
@@ -217,7 +232,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     private static final class GeneratorContext {
         Chain exit = null;
         Chain continue_ = null;
-        Chain bodyEntry = null;
+        public List<CaseData> cases = null;
 
         void addExit(Chain chain) {
             exit = mergeChains(chain, exit);
@@ -226,9 +241,25 @@ public final class CodeGenerator extends VisitorAdaptor {
         void addContinue(Chain chain) {
             continue_ = mergeChains(chain, continue_);
         }
+
+        void addCase(CaseData caseData) {
+            if (cases == null) cases = new ArrayList<>();
+            cases.add(caseData);
+        }
     }
 
     private GeneratorContext info;
+
+    private static class CaseData {
+        public final int value;
+        public Chain entry;
+        public final SyntaxNode body;
+
+        private CaseData(int value, SyntaxNode body) {
+            this.value = value;
+            this.body = body;
+        }
+    }
 
     @Override
     public void visit(MJSwitch node) {
@@ -236,36 +267,49 @@ public final class CodeGenerator extends VisitorAdaptor {
             return;
         }
 
-        Item selector = generateExpression(node.getExpression());
-        selector.load();
+        Item selector = generateExpression(node.getExpression()).load();
 
         GeneratorContext old = info;
         info = new GeneratorContext();
 
         node.getSwitch_block().accept(this);
+
+        for (CaseData c : info.cases) {
+            code.emitop0(dup);
+            items.makeImmediateItem(c.value).load();
+            c.entry = mergeChains(c.entry, code.branch(ifeq));
+        }
+
+        Chain endSwitch = code.branch(jmp);
+
+        for (CaseData c : info.cases) {
+            code.resolve(c.entry);
+            generateStatement(c.body);
+        }
+
         code.resolve(info.exit);
+        code.resolve(endSwitch);
+
+        selector.drop();
 
         info = old;
-        selector.drop();
     }
+
+    private SyntaxNode currentSwitchBody = null;
 
     @Override
     public void visit(MJSwitchStatementsGroup node) {
+        currentSwitchBody = node.getBlock_statements();
         node.getSwitch_labels().accept(this);
-
-        Chain skip = code.branch(jmp);
-        code.resolve(info.bodyEntry);
-
-        generateStatement(node.getBlock_statements());
-        code.resolve(skip);
-        info.bodyEntry = null;
+        currentSwitchBody = null;
     }
 
     @Override
     public void visit(MJSwitchLabelValue node) {
-        code.emitop0(dup);
-        items.makeImmediateItem(node.getI1()).load();
-        info.bodyEntry = mergeChains(info.bodyEntry, code.branch(ifeq));
+        int value = node.getI1();
+
+        CaseData caseData = new CaseData(value, currentSwitchBody);
+        info.addCase(caseData);
     }
 
     @Override
@@ -331,9 +375,13 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJClassInstanceCreation node) {
+        Symbol clazz = node.expressionvalue.getSymbol();
         Type type = node.expressionvalue.getType();
         int fieldCount = type.getFieldCount();
         code.emitop2(new_, fieldCount);
+        code.emitop0(dup);
+        items.makeImmediateItem(clazz.getAddress()).load();
+        code.emitop2(putfield, 0);
         result = items.makeStackItem(type);
     }
 
@@ -360,6 +408,10 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJMethodInvocation node) {
+        Symbol method = node.expressionvalue.getSymbol();
+        if (method.isMember()) {
+            items.makeThisItem().load();
+        }
         generateArguments(node.getArgument_list_opt());
         Item item = generateExpression(node.getName());
         result = item.invoke();
@@ -367,6 +419,10 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJQualifiedMethodInvocation node) {
+        Symbol method = node.expressionvalue.getSymbol();
+        if (method.isMember()) {
+            items.makeThisItem().load();
+        }
         generateExpression(node.getPrimary()).load();
         generateArguments(node.getArgument_list_opt());
         Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
@@ -529,7 +585,7 @@ public final class CodeGenerator extends VisitorAdaptor {
             SyntaxNode right,
             int opcode
     ) {
-        if (opcode >= ifeq && opcode <= ifle) {
+        if (opcode >= ifeq && opcode <= ifge) {
             generateExpression(left).load();
             generateExpression(right).load();
             return items.makeConditionalItem(opcode, true);
@@ -564,18 +620,6 @@ public final class CodeGenerator extends VisitorAdaptor {
         }
     }
 
-    private static boolean evaluate(int left, int right, int opcode) {
-        switch (opcode) {
-            case ifeq: return left == right;
-            case ifne: return left != right;
-            case iflt: return left < right;
-            case ifle: return left <= right;
-            case ifgt: return left > right;
-            case ifge: return left >= right;
-            default: throw new AssertionError("Unexpected opcode: " + opcode);
-        }
-    }
-
     private static int calculate(int left, int right, int opcode) {
         switch (opcode) {
             case add: return left + right;
@@ -597,8 +641,7 @@ public final class CodeGenerator extends VisitorAdaptor {
             result = items.makeConditionalItem(
                     right.opcode,
                     right.trueJumps,
-                    mergeChains(falseJumps, right.falseJumps),
-                    true
+                    mergeChains(falseJumps, right.falseJumps)
             );
         } else {
             result = left;
@@ -615,8 +658,7 @@ public final class CodeGenerator extends VisitorAdaptor {
             result = items.makeConditionalItem(
                     right.opcode,
                     mergeChains(trueJumps, right.trueJumps),
-                    right.falseJumps,
-                    true
+                    right.falseJumps
             );
         } else {
             result = left;
@@ -670,45 +712,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     }
 
     private ConditionalItem generateConditional(SyntaxNode node) {
-        if (node instanceof MJTernaryOperation){
-            SyntaxNode conditional = ((MJTernaryOperation) node).getConditional_or_expression();
-            SyntaxNode trueBranch = ((MJTernaryOperation) node).getExpression();
-            SyntaxNode falseBranch = ((MJTernaryOperation) node).getConditional_expression();
-
-            ConditionalItem condition = generateConditional(conditional);
-
-            // if always true
-            if (condition.isTrue()) {
-                code.resolve(condition.trueJumps);
-                return generateConditional(trueBranch);
-            }
-
-            // if always false
-            if (condition.isFalse()) {
-                code.resolve(condition.falseJumps);
-                return generateConditional(falseBranch);
-            }
-
-            Chain secondJumps = condition.falseJumps;
-            code.resolve(condition.trueJumps);
-
-            ConditionalItem first = generateConditional(trueBranch);
-            Chain falseJumps = first.jumpFalse();
-            code.resolve(first.trueJumps);
-
-            Chain trueJumps = code.branch(jmp);
-            code.resolve(secondJumps);
-
-            ConditionalItem second = generateConditional(falseBranch);
-
-            return items.makeConditionalItem(
-                    second.opcode,
-                    mergeChains(trueJumps, second.trueJumps),
-                    mergeChains(falseJumps, second.falseJumps)
-            );
-        } else {
-            return generateExpression(node).makeConditional();
-        }
+        return generateExpression(node).asConditional();
     }
 
     // <editor-fold defaultstate="collapsed" desc="Traversal methods">
@@ -872,7 +876,6 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJNextSwitchStatementsGroups node) {
         node.childrenAccept(this);
     }
-
 
     @Override
     public void visit(MJBreakStatement node) {

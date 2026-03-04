@@ -73,8 +73,8 @@ public final class Items {
         return makeConditionalItem(opcode, false);
     }
 
-    ConditionalItem makeConditionalItem(int opcode, boolean isBinaryOperationResult) {
-        return new ConditionalItem(opcode, null, null, isBinaryOperationResult);
+    ConditionalItem makeConditionalItem(int opcode, boolean fromRelational) {
+        return new ConditionalItem(opcode, null, null, fromRelational);
     }
 
     public Item makeStackItem(Type type) {
@@ -84,8 +84,17 @@ public final class Items {
     abstract class Item {
         int typecode;
 
+        // If the boolean value is used in a condition on its own, an additional const_1 needs to be
+        // loaded in order to compare it against a truthy value.
+        private final boolean fromRelational;
+
         Item(int typecode) {
+            this(typecode, false);
+        }
+
+        Item(int typecode, boolean fromRelational) {
             this.typecode = typecode;
+            this.fromRelational = fromRelational;
         }
 
         Item load() {
@@ -106,8 +115,9 @@ public final class Items {
             stackItem[toscode].duplicate();
         }
 
-        ConditionalItem makeConditional() {
+        ConditionalItem asConditional() {
             load();
+            if (!fromRelational) makeImmediateItem(0).load();
             return makeConditionalItem(ifne);
         }
     }
@@ -174,7 +184,7 @@ public final class Items {
 
         @Override
         Item load() {
-            code.emitop0(load_n);
+            code.emitop0(load_0);
             return stackItem[typecode];
         }
     }
@@ -190,9 +200,9 @@ public final class Items {
         @Override
         Item load() {
             if (position <= 3) {
-                code.emitop0(load_n + position);
+                code.emitop0(load_0 + position);
             } else {
-                code.emitop2(load, position);
+                code.emitop1(load, position);
             }
             return stackItem[typecode];
         }
@@ -202,7 +212,7 @@ public final class Items {
             if (position <= 3) {
                 code.emitop0(store_0 + position);
             } else {
-                code.emitop2(store, position);
+                code.emitop1(store, position);
             }
         }
 
@@ -233,13 +243,17 @@ public final class Items {
 
         @Override
         Item load() {
-            code.emitop2(getfield, symbol.getAddress());
+            if (symbol.getMJKind().isCallable()) {
+                code.emitop2(getfield, 0);
+            } else {
+                code.emitop2(getfield, symbol.getAddress() + 1);
+            }
             return stackItem[typecode];
         }
 
         @Override
         void store() {
-            code.emitop2(putfield, symbol.getAddress());
+            code.emitop2(putfield, symbol.getAddress() + 1);
         }
 
         Item invoke() {
@@ -270,7 +284,7 @@ public final class Items {
         }
 
         @Override
-        public ConditionalItem makeConditional() {
+        public ConditionalItem asConditional() {
             return makeConditionalItem(value != 0 ? jmp : dontjmp);
         }
     }
@@ -350,21 +364,16 @@ public final class Items {
         int opcode;
         boolean isBinaryOperationResult;
 
-        ConditionalItem(int opcode, Chain trueJumps, Chain falseJumps) {
-            this(opcode, trueJumps, falseJumps, false);
-        }
-
         ConditionalItem(
                 int opcode,
                 Chain trueJumps,
                 Chain falseJumps,
-                boolean isBinaryOperationResult
+                boolean fromRelational
         ) {
-            super(byteCode);
+            super(byteCode, fromRelational);
             this.opcode = opcode;
             this.trueJumps = trueJumps;
             this.falseJumps = falseJumps;
-            this.isBinaryOperationResult = isBinaryOperationResult;
         }
 
         @Override
@@ -401,7 +410,7 @@ public final class Items {
         }
 
         Chain jumpFalse() {
-            return mergeChains(falseJumps, code.branch(BytecodeEmitter.negate(opcode)));
+            return mergeChains(falseJumps, code.branch(code.negate(opcode)));
         }
 
         boolean isTrue() {
@@ -413,7 +422,7 @@ public final class Items {
         }
 
         @Override
-        public ConditionalItem makeConditional() {
+        public ConditionalItem asConditional() {
             return this;
         }
     }

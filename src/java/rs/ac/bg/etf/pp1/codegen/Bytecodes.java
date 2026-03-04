@@ -4,7 +4,7 @@ package rs.ac.bg.etf.pp1.codegen;
 public interface Bytecodes {
     int
         load        =  1,
-        load_n      =  2,
+        load_0 =  2,
         load_1      =  3,
         load_2      =  4,
         load_3      =  5,

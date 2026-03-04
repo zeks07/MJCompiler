@@ -1,6 +1,6 @@
 package rs.ac.bg.etf.pp1.codegen;
 
-import rs.ac.bg.etf.pp1.logger.CompilerLogger;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.etf.pp1.mj.runtime.Code;
 
@@ -12,13 +12,14 @@ import static rs.ac.bg.etf.pp1.symbols.Symbol.*;
 @SuppressWarnings("SpellCheckingInspection")
 public final class BytecodeEmitter {
     private static final Context.Key<BytecodeEmitter> emitterKey = new Context.Key<>();
-    private final CompilerLogger logger;
+    private final CompilerDiagnostics diagnostics;
     private boolean alive = true;
     private Chain pendingJumps = null;
+    private int nextStatic = 0;
 
     private BytecodeEmitter(Context context) {
         context.put(emitterKey, this);
-        this.logger = CompilerLogger.getInstance(context);
+        this.diagnostics = CompilerDiagnostics.getInstance(context);
     }
 
     public static BytecodeEmitter getInstance(Context context) {
@@ -32,7 +33,7 @@ public final class BytecodeEmitter {
     private void emit1(int od) {
         if (!alive) return;
         if (pc >= buf.length) {
-            logger.error("Code too big.");
+            diagnostics.reportError("Code too big.");
             alive = false;
             return;
         }
@@ -101,7 +102,7 @@ public final class BytecodeEmitter {
         emit4(od);
     }
 
-    public int emitVirtualFunction(MethodSymbol method, int nextStatic) {
+    public void emitVirtualFunction(MethodSymbol method) {
         for (char c : method.getName().toCharArray()) {
             emitop4(const_, c);
             emitop2(putstatic, nextStatic++);
@@ -109,21 +110,19 @@ public final class BytecodeEmitter {
         emitop0(const_m1);
         emitop2(putstatic, nextStatic++);
         emitop4(const_, method.getAddress());
-        emitop2(invokevirtual, nextStatic++);
-
-        return nextStatic;
+        emitop2(putstatic, nextStatic++);
     }
 
-    public int emitVFTEntryEnd(int nextStatic) {
+    public void emitVFTEntryEnd() {
         emitop4(const_, -2);
         emitop2(putstatic, nextStatic++);
-        return nextStatic;
     }
 
     public void emitInvokevirtual(String name) {
         emit1(invokevirtual);
-        for (char c : name.toCharArray()) emit1(c);
-        emit1(const_m1);
+        for (char c : name.toCharArray())
+            emit4(c);
+        emit4(-1);
     }
 
     public boolean isAlive() {
@@ -144,8 +143,8 @@ public final class BytecodeEmitter {
         return pc;
     }
 
-    public void setMain() {
-        mainPc = pc;
+    public void setMain(int entry) {
+        mainPc = entry;
     }
 
     public void emitCall(int address) {
@@ -167,8 +166,19 @@ public final class BytecodeEmitter {
         }
     }
 
-    public static int negate(int opcode) {
-        return ((opcode + 1) ^ 1) - 1;
+    public int negate(int opcode) {
+        switch (opcode) {
+            case Bytecodes.ifeq: return Bytecodes.ifne;
+            case Bytecodes.ifne: return Bytecodes.ifeq;
+            case Bytecodes.iflt: return Bytecodes.ifge;
+            case Bytecodes.ifge: return Bytecodes.iflt;
+            case Bytecodes.ifgt: return Bytecodes.ifle;
+            case Bytecodes.ifle: return Bytecodes.ifgt;
+            default: {
+                diagnostics.reportError("Unexpected opcode: " + opcode);
+                return opcode;
+            }
+        }
     }
 
     public int emitJump(int opcode) {
@@ -226,8 +236,16 @@ public final class BytecodeEmitter {
         else return new Chain(chain1.pc, mergeChains(chain1.next, chain2));
     }
 
-    public void setDataSize(int size) {
-        dataSize = size;
+    public void setStaticFieldCount(int size) {
+        nextStatic = size;
+    }
+
+    public int getNextStatic() {
+        return nextStatic;
+    }
+
+    public void setDataSize() {
+        dataSize = nextStatic;
     }
 
     public int getDataSize() {

@@ -2,31 +2,32 @@ package rs.ac.bg.etf.pp1;
 
 import java_cup.runtime.Symbol;
 import rs.ac.bg.etf.pp1.ast.*;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
+import rs.ac.bg.etf.pp1.util.Context;
 
 parser code {:
-    private boolean ok = true;
-
-    public boolean isOk() {
-        return ok;
-    }
+    private CompilerDiagnostics diagnostics;
 
     public void report_fatal_error(String message, Object info) {
-        ok = false;
         done_parsing();
         report_error(message, info);
     }
 
     public void report(String message, Object info) {
-        ok = false;
         StringBuilder string = new StringBuilder("Syntax error");
         if (info instanceof Symbol) {
             string.append(" on line ").append(((Symbol) info).left);
         }
         string.append(": ").append(message);
-        System.err.println(string);
+        diagnostics.reportError(string.toString());
     }
 
     public void report_error(String message, Object info) {
+    }
+
+    public MJParser(java_cup.runtime.Scanner s, Context context) {
+        this(s);
+        this.diagnostics = CompilerDiagnostics.getInstance(context);
     }
 :}
 
@@ -52,8 +53,8 @@ terminal NULL_LITERAL;
 terminal String IDENTIFIER;
 
 // Literals, types and names
-non terminal rs.ac.bg.etf.pp1.symbols.Type literal, const_literal;
-non terminal rs.ac.bg.etf.pp1.symbols.Type MJType;
+non terminal rs.ac.bg.etf.pp1.symbols.ExpressionValue literal, const_literal;
+non terminal rs.ac.bg.etf.pp1.symbols.ExpressionValue MJType;
 non terminal rs.ac.bg.etf.pp1.symbols.ExpressionValue name, simple_name, qualified_name;
 
 // Definitions

@@ -2,7 +2,7 @@ package rs.ac.bg.etf.pp1.semantic;
 
 import rs.ac.bg.etf.pp1.ast.MJMethodDeclaration;
 import rs.ac.bg.etf.pp1.ast.SyntaxNode;
-import rs.ac.bg.etf.pp1.logger.CompilerLogger;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.symbols.*;
 import rs.ac.bg.etf.pp1.util.Context;
 
@@ -10,21 +10,17 @@ import static rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import static rs.ac.bg.etf.pp1.symbols.Type.*;
 
 public final class Environment {
-    private final CompilerLogger logger;
+    private final CompilerDiagnostics diagnostics;
     private ScopeContext context;
     private final SymbolTable table;
-    private boolean ok = true;
 
     public Environment(Context context) {
         this.table = SymbolTable.getInstance(context);
-        this.logger = CompilerLogger.getInstance(context);
+        this.diagnostics = CompilerDiagnostics.getInstance(context);
     }
 
-    // General
-
     public void error(String message, SyntaxNode node) {
-        ok = false;
-        logger.error(message, node.getLine());
+        diagnostics.reportError(message, node.getLine());
     }
 
     public Symbol insert(
@@ -436,16 +432,15 @@ public final class Environment {
         return BuiltIn.INT;
     }
 
-    public Type requireClassType(String name, SyntaxNode node) {
-        Symbol clazz = table.find(name);
+    public void requireClass(Symbol clazz, SyntaxNode node) {
+        String name = clazz.getName();
         if (clazz.getSymbolType().getMJKind() != TypeKind.CLASS) {
             error("`" + name + "` is not a class.", node);
-            return BuiltIn.VOID;
+            return;
         }
         if (clazz.isAbstract()) {
             error("Cannot instantiate abstract class `" + name + "'.", node);
         }
-        return clazz.getSymbolType();
     }
 
     public Type requireArray(Type type, Type expressionType, SyntaxNode node) {

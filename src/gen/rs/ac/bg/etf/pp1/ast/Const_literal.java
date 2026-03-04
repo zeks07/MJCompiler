@@ -1,6 +1,6 @@
 // generated with ast extension for cup
 // version 0.8
-// 24/1/2026 16:21:13
+// 3/2/2026 16:57:9
 
 
 package rs.ac.bg.etf.pp1.ast;
@@ -11,7 +11,7 @@ public abstract class Const_literal implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbols.Type type = null;
+    public rs.ac.bg.etf.pp1.symbols.ExpressionValue expressionvalue = null;
 
     public SyntaxNode getParent() {
         return parent;

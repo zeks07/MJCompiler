@@ -6,6 +6,9 @@ import rs.ac.bg.etf.pp1.ast.MJProgram;
 import rs.ac.bg.etf.pp1.ast.Program;
 import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
 import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
+import rs.ac.bg.etf.pp1.codegen.RuntimeLibrary;
+import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
+import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.semantic.SemanticAnalyser;
 import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.util.Context;
@@ -49,9 +52,11 @@ public final class Compiler {
         }
 
         Context context = new Context();
+        CompilerDiagnostics diagnostics = CompilerDiagnostics.getInstance(context);
+        CompilerLogger logger = CompilerLogger.getInstance(context);
 
-        Scanner scanner = new MJScanner(reader);
-        MJParser parser = new MJParser(scanner);
+        Scanner scanner = new MJScanner(reader, context);
+        MJParser parser = new MJParser(scanner, context);
 
         Symbol symbol;
         try {
@@ -65,19 +70,27 @@ public final class Compiler {
             return;
         }
 
+        if (diagnostics.hasErrors()) {
+            logger.renderAll(diagnostics.all());
+            return;
+        }
+
         Program program = (Program) symbol.value;
 
         Tab.init();
         BuiltIn.init();
+        BytecodeEmitter.reset();
 
         SemanticAnalyser analyser = new SemanticAnalyser(context);
 
         program.accept(analyser);
 
-//        DumpSymbolTableVisitor visitor = new DumpSymbolTableVisitor();
-//        SymbolTable table = SymbolTable.getInstance(context);
-//        table.dump(visitor);
-//        System.out.println(program.toString(" "));
+        if (diagnostics.hasErrors()) {
+            logger.renderAll(diagnostics.all());
+            return;
+        }
+
+        RuntimeLibrary.emit(context);
 
         CodeGenerator generator = new CodeGenerator(context);
         generator.generateProgram((MJProgram) program);
@@ -89,6 +102,11 @@ public final class Compiler {
             BytecodeEmitter.write(os);
         } catch (IOException e) {
             System.err.println("Failed to write bytecode to file `" + output);
+        }
+
+        if (diagnostics.hasErrors()) {
+            logger.renderAll(diagnostics.all());
+            return;
         }
 
         disasm.main( new String[] { output.toString() });
