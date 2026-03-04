@@ -377,8 +377,8 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJClassInstanceCreation node) {
         Symbol clazz = node.expressionvalue.getSymbol();
         Type type = node.expressionvalue.getType();
-        int fieldCount = type.getFieldCount();
-        code.emitop2(new_, fieldCount);
+        int fieldCount = type.getFieldCount() + 1;
+        code.emitop2(new_, fieldCount * 4);
         code.emitop0(dup);
         items.makeImmediateItem(clazz.getAddress()).load();
         code.emitop2(putfield, 0);
@@ -389,7 +389,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJArrayCreation node) {
         Type arrayType = node.expressionvalue.getType().getElementType();
         generateExpression(node.getExpression()).load();
-        code.emitop1(newarray, arrayType == BuiltIn.CHAR ? 1 : 0);
+        code.emitop1(newarray, arrayType == BuiltIn.CHAR ? 0 : 1);
         result = items.makeStackItem(arrayType);
     }
 
@@ -410,7 +410,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJMethodInvocation node) {
         Symbol method = node.expressionvalue.getSymbol();
         if (method.isMember()) {
-            items.makeThisItem().load();
+            generateExpression(node.getName());
         }
         generateArguments(node.getArgument_list_opt());
         Item item = generateExpression(node.getName());
@@ -421,7 +421,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJQualifiedMethodInvocation node) {
         Symbol method = node.expressionvalue.getSymbol();
         if (method.isMember()) {
-            items.makeThisItem().load();
+            generateExpression(node.getPrimary()).load();
         }
         generateExpression(node.getPrimary()).load();
         generateArguments(node.getArgument_list_opt());

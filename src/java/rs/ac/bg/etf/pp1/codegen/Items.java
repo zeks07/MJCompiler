@@ -151,13 +151,21 @@ public final class Items {
 
         @Override
         Item load() {
-            code.emitop0(aload);
+            if (typecode == charCode || typecode == byteCode) {
+                code.emitop0(baload);
+            } else {
+                code.emitop0(aload);
+            }
             return stackItem[typecode];
         }
 
         @Override
         void store() {
-            code.emitop0(astore);
+            if (typecode == charCode || typecode == byteCode) {
+                code.emitop0(bastore);
+            } else {
+                code.emitop0(astore);
+            }
         }
 
         @Override
