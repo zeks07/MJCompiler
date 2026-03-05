@@ -1,0 +1,299 @@
+C:\Users\zeljk\.jdks\temurin-1.8.0_482\bin\java.exe "-javaagent:C:\Users\zeljk\AppData\Local\Programs\IntelliJ IDEA Ultimate\lib\idea_rt.jar=63265" -Dfile.encoding=UTF-8 -classpath C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\charsets.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\access-bridge-64.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\cldrdata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\dnsns.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\jaccess.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\localedata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\nashorn.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunec.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunjce_provider.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunmscapi.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunpkcs11.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\zipfs.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jce.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jfr.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jsse.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\management-agent.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\resources.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\rt.jar;C:\Users\zeljk\Projects\2026\MJCompiler\out\production\MJCompiler;C:\Users\zeljk\Projects\2026\MJCompiler\lib\cup_v10k.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\JFlex.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
+codeSize=546
+dataSize=3
+mainPC=60
+0: enter 1 1
+3: load_0
+4: exit
+5: return
+6: enter 1 1
+9: load_0
+10: exit
+11: return
+12: enter 2 2
+15: load_0
+16: load_1
+17: add
+18: exit
+19: return
+20: enter 2 3
+23: load_1
+24: const_1
+25: jne 8 (=33)
+28: const_1
+29: store_2
+30: jmp 10 (=40)
+33: load_1
+34: const_2
+35: jne 5 (=40)
+38: load_0
+39: store_2
+40: load_0
+41: load_2
+42: call -30 (=12)
+45: exit
+46: return
+47: enter 0 0
+50: const 118
+55: const_1
+56: bprint
+57: const_0
+58: exit
+59: return
+60: enter 0 0
+63: const_1
+64: const_1
+65: jeq 14 (=79)
+68: const 6
+73: neg
+74: const_1
+75: print
+76: jmp 6 (=82)
+79: const_0
+80: const_1
+81: print
+82: const_0
+83: putstatic 1
+86: const_0
+87: putstatic 0
+90: const_0
+91: putstatic 0
+94: getstatic 0
+97: const_5
+98: jge 27 (=125)
+101: getstatic 0
+104: const_2
+105: jne 7 (=112)
+108: const_1
+109: putstatic 1
+112: getstatic 0
+115: dup
+116: const_1
+117: add
+118: putstatic 0
+121: pop
+122: jmp -28 (=94)
+125: getstatic 1
+128: const_0
+129: jeq 20 (=149)
+132: getstatic 0
+135: const_5
+136: jne 9 (=145)
+139: const_1
+140: const_1
+141: print
+142: jmp 7 (=149)
+145: const_1
+146: neg
+147: const_1
+148: print
+149: const_3
+150: newarray 1
+152: putstatic 2
+155: getstatic 2
+158: const_0
+159: const_1
+160: astore
+161: getstatic 2
+164: const_1
+165: const_2
+166: astore
+167: getstatic 2
+170: const_2
+171: getstatic 2
+174: const_1
+175: aload
+176: getstatic 2
+179: const_0
+180: aload
+181: call -169 (=12)
+184: const_1
+185: add
+186: astore
+187: getstatic 2
+190: const_2
+191: aload
+192: const_4
+193: jeq 10 (=203)
+196: call -149 (=47)
+199: const_0
+200: jeq 16 (=216)
+203: const 65
+208: call -202 (=6)
+211: const_1
+212: print
+213: jmp 13 (=226)
+216: const 97
+221: call -215 (=6)
+224: const_1
+225: print
+226: const_0
+227: const_1
+228: bprint
+229: const_0
+230: putstatic 0
+233: getstatic 0
+236: const 10
+241: jge 46 (=287)
+244: getstatic 0
+247: const_3
+248: jne 16 (=264)
+251: getstatic 0
+254: dup
+255: const_1
+256: add
+257: putstatic 0
+260: pop
+261: jmp -28 (=233)
+264: getstatic 0
+267: const_4
+268: jne 6 (=274)
+271: jmp 16 (=287)
+274: getstatic 0
+277: const_1
+278: call -258 (=20)
+281: putstatic 0
+284: jmp -51 (=233)
+287: getstatic 0
+290: const_3
+291: jne 16 (=307)
+294: call -247 (=47)
+297: const_0
+298: jeq 9 (=307)
+301: const_4
+302: const_1
+303: print
+304: jmp 7 (=311)
+307: const_4
+308: neg
+309: const_1
+310: print
+311: getstatic 2
+314: const_0
+315: aload
+316: read
+317: getstatic 2
+320: const_1
+321: aload
+322: read
+323: getstatic 2
+326: const_2
+327: aload
+328: read
+329: const_0
+330: const_1
+331: bprint
+332: getstatic 2
+335: const_0
+336: aload
+337: getstatic 2
+340: const_1
+341: aload
+342: call -330 (=12)
+345: getstatic 2
+348: const_2
+349: aload
+350: call -338 (=12)
+353: const_1
+354: print
+355: const_0
+356: putstatic 0
+359: getstatic 0
+362: getstatic 2
+365: arraylength
+366: jge 21 (=387)
+369: getstatic 0
+372: const_1
+373: print
+374: getstatic 0
+377: dup
+378: const_1
+379: add
+380: putstatic 0
+383: pop
+384: jmp -25 (=359)
+387: const_0
+388: const_1
+389: bprint
+390: getstatic 2
+393: const_2
+394: aload
+395: const_2
+396: call -376 (=20)
+399: const_1
+400: print
+401: call -354 (=47)
+404: const_0
+405: jeq 11 (=416)
+408: const 116
+413: jmp 8 (=421)
+416: const 102
+421: const_1
+422: bprint
+423: const_0
+424: putstatic 0
+427: getstatic 0
+430: const 10
+435: jge 109 (=544)
+438: getstatic 0
+441: const_1
+442: add
+443: dup
+444: const_1
+445: jeq 39 (=484)
+448: dup
+449: const_3
+450: jeq 40 (=490)
+453: dup
+454: const_2
+455: jeq 38 (=493)
+458: dup
+459: const_5
+460: jeq 39 (=499)
+463: dup
+464: const 6
+469: jeq 44 (=513)
+472: dup
+473: const 9
+478: jeq 42 (=520)
+481: jmp 46 (=527)
+484: const_1
+485: const_1
+486: print
+487: jmp 40 (=527)
+490: const_3
+491: const_1
+492: print
+493: const_2
+494: const_1
+495: print
+496: jmp 31 (=527)
+499: const_5
+500: const_1
+501: print
+502: getstatic 0
+505: const_2
+506: add
+507: putstatic 0
+510: jmp 21 (=531)
+513: const 6
+518: const_1
+519: print
+520: const 9
+525: const_1
+526: print
+527: pop
+528: const_0
+529: const_1
+530: bprint
+531: getstatic 0
+534: dup
+535: const_1
+536: add
+537: putstatic 0
+540: pop
+541: jmp -114 (=427)
+544: exit
+545: return
+
+Process finished with exit code 0

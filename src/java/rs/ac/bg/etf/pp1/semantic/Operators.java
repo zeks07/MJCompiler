@@ -8,16 +8,9 @@ import rs.ac.bg.etf.pp1.symbols.Type;
 public final class Operators {
     private Operators() {}
 
-    public static final UnaryOperator NEG = (variable, environment, node) -> {
-        if (variable.getSymbolType() != BuiltIn.INT) {
-            environment.error("Operator `-` cannot be applied to `" + variable.getName() + "`.", node);
-            return BuiltIn.VOID;
-        }
-
-        return BuiltIn.INT;
-    };
-    public static final UnaryOperator INC = new ArithmeticUnaryOperator("++");
-    public static final UnaryOperator DEC = new ArithmeticUnaryOperator("--");
+    public static final UnaryOperator NEG = new UnaryOperator("-");
+    public static final AssignableUnaryOperator INC = new AssignableUnaryOperator("++");
+    public static final AssignableUnaryOperator DEC = new AssignableUnaryOperator("--");
     public static final BinaryOperator ADD = new ArithmeticOperator("+");
     public static final BinaryOperator SUB = new ArithmeticOperator("-");
     public static final BinaryOperator MUL = new ArithmeticOperator("*");
@@ -34,18 +27,34 @@ public final class Operators {
     public static final BinaryOperator AND = new LogicalOperator("&&");
     public static final BinaryOperator OR = new LogicalOperator("||");
 
-    public interface UnaryOperator {
-        Type check(Symbol variable, Environment environment, SyntaxNode node);
-    }
+    protected static abstract class Operator {
+        protected final String symbol;
 
-    public static final class ArithmeticUnaryOperator implements UnaryOperator {
-        private final String symbol;
-
-        public ArithmeticUnaryOperator(String symbol) {
+        public Operator(String symbol) {
             this.symbol = symbol;
         }
+    }
 
-        @Override
+    public static final class UnaryOperator extends Operator {
+        public UnaryOperator(String symbol) {
+            super(symbol);
+        }
+
+        Type check(Type type, Environment environment, SyntaxNode node) {
+            if (!type.isAssignableTo(BuiltIn.INT)) {
+                environment.error("Operator `" + symbol + "` cannot be applied to `" + type.getName() + "`.", node);
+                return BuiltIn.VOID;
+            }
+
+            return BuiltIn.INT;
+        }
+    }
+
+    public static final class AssignableUnaryOperator extends Operator {
+        public AssignableUnaryOperator(String symbol) {
+            super(symbol);
+        }
+
         public Type check(Symbol variable, Environment environment, SyntaxNode node) {
             if (variable == BuiltIn.NO_OBJECT) {
                 return BuiltIn.VOID;
@@ -77,11 +86,9 @@ public final class Operators {
         Type returnType(Type left, Type right);
     }
 
-    public static final class ArithmeticOperator implements BinaryOperator {
-        private final String symbol;
-
+    public static final class ArithmeticOperator extends Operator implements BinaryOperator {
         public ArithmeticOperator(String symbol) {
-            this.symbol = symbol;
+            super(symbol);
         }
 
         @Override
@@ -103,12 +110,9 @@ public final class Operators {
         }
     }
 
-    public static final class LogicalOperator implements BinaryOperator {
-
-        private final String symbol;
-
+    public static final class LogicalOperator extends Operator implements BinaryOperator {
         public LogicalOperator(String symbol) {
-            this.symbol = symbol;
+            super(symbol);
         }
 
         @Override
@@ -125,11 +129,9 @@ public final class Operators {
         }
     }
 
-    public static final class RelationalOperator implements BinaryOperator {
-        private final String symbol;
-
+    public static final class RelationalOperator extends Operator implements BinaryOperator {
         public RelationalOperator(String symbol) {
-            this.symbol = symbol;
+            super(symbol);
         }
 
         @Override

@@ -348,6 +348,14 @@ public final class Environment {
         }
     }
 
+    public void enterLoop() {
+        context = new ScopeContext.LoopContext(context);
+    }
+
+    public void exitLoop() {
+        context = context.outer;
+    }
+
     public void enterSwitchStatement() {
         context = new ScopeContext.SwitchContext(context);
     }

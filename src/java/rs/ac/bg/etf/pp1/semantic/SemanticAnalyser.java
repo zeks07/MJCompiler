@@ -407,8 +407,10 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             Type type = expression.expressionvalue.getType();
             environment.requireCompatibleWith(type, BuiltIn.BOOLEAN, node);
 
+            environment.enterLoop();
             node.getFor_update_opt().accept(statementVisitor);
             node.getStatement().accept(statementVisitor);
+            environment.exitLoop();
         }
 
         @Override
@@ -420,8 +422,10 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             Type type = expression.expressionvalue.getType();
             environment.requireCompatibleWith(type, BuiltIn.BOOLEAN, node);
 
+            environment.enterLoop();
             node.getFor_update_opt().accept(statementVisitor);
             node.getStatement_no_short_if().accept(statementVisitor);
+            environment.enterLoop();
         }
 
         @Override
@@ -917,7 +921,7 @@ public final class SemanticAnalyser extends VisitorAdaptor {
         public void visit(MJNegation node) {
             Unary_expression expression = node.getUnary_expression();
             expression.accept(expressionVisitor);
-            Symbol variable = expression.expressionvalue.getSymbol();
+            Type variable = expression.expressionvalue.getType();
             node.expressionvalue = new ExpressionValue(Operators.NEG.check(variable, environment, node));
         }
 

@@ -36,8 +36,8 @@ public final class Items {
         return new IndexedItem(type);
     }
 
-    Item makeImmediateItem(int value) {
-        return new ImmediateItem(value);
+    Item makeImmediateItem(int typecode, int value) {
+        return new ImmediateItem(typecode, value);
     }
 
     Item makeStaticItem(Symbol symbol) {
@@ -57,16 +57,7 @@ public final class Items {
     }
 
     ConditionalItem makeConditionalItem(int opcode, Chain trueJumps, Chain falseJumps) {
-        return makeConditionalItem(opcode, trueJumps, falseJumps, false);
-    }
-
-    ConditionalItem makeConditionalItem(
-            int opcode,
-            Chain trueJumps,
-            Chain falseJumps,
-            boolean isBinaryOperationResult
-    ) {
-        return new ConditionalItem(opcode, trueJumps, falseJumps, isBinaryOperationResult);
+        return new ConditionalItem(opcode, trueJumps, falseJumps, false);
     }
 
     ConditionalItem makeConditionalItem(int opcode) {
@@ -117,7 +108,7 @@ public final class Items {
 
         ConditionalItem asConditional() {
             load();
-            if (!fromRelational) makeImmediateItem(0).load();
+            if (!fromRelational) makeImmediateItem(intCode, 0).load();
             return makeConditionalItem(ifne);
         }
     }
@@ -230,10 +221,10 @@ public final class Items {
             } else {
                 load();
                 if (value >= 0) {
-                    makeImmediateItem(value).load();
+                    makeImmediateItem(typecode, value).load();
                     code.emitop0(add);
                 } else {
-                    makeImmediateItem(-value).load();
+                    makeImmediateItem(typecode, -value).load();
                     code.emitop0(sub);
                 }
                 store();
@@ -274,8 +265,8 @@ public final class Items {
     final class ImmediateItem extends Item {
         final int value;
 
-        ImmediateItem(int value) {
-            super(intCode);
+        ImmediateItem(int typecode, int value) {
+            super(typecode);
             this.value = value;
         }
 

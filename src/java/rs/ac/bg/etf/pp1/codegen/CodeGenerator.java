@@ -112,24 +112,24 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJIntegerLiteral node) {
-        result = items.makeImmediateItem(node.getI1());
+        result = items.makeImmediateItem(intCode, node.getI1());
     }
 
     @Override
     public void visit(MJBooleanLiteral node) {
-        result = items.makeImmediateItem(node.getB1());
+        result = items.makeImmediateItem(byteCode, node.getB1());
     }
 
     @Override
     public void visit(MJCharacterLiteral node) {
-        result = items.makeImmediateItem(node.getC1());
+        result = items.makeImmediateItem(charCode, node.getC1());
     }
 
     @Override
     public void visit(MJSimpleName node) {
         Symbol symbol = node.expressionvalue.getSymbol();
         if (symbol.getMJKind().isConstant()) {
-            result = items.makeImmediateItem(symbol.getAddress());
+            result = items.makeImmediateItem(symbol.getSymbolType().getMJKind().getTypecode(), symbol.getAddress());
         } else if (symbol.isStatic()) {
             result = items.makeStaticItem(symbol);
         } else if (symbol.isMember()) {
@@ -142,11 +142,12 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJQualifiedName node) {
-        if (node.getName().expressionvalue.getSymbol().getMJKind().isType()) {
-            result = items.makeImmediateItem(node.expressionvalue.getSymbol().getAddress());
+        Symbol symbol = node.expressionvalue.getSymbol();
+        if (symbol.getMJKind().isType()) {
+            result = items.makeImmediateItem(symbol.getSymbolType().getMJKind().getTypecode(), symbol.getAddress());
         } else {
             generateExpression(node.getName()).load();
-            result = items.makeMemberItem(node.expressionvalue.getSymbol());
+            result = items.makeMemberItem(symbol);
         }
     }
 
@@ -271,12 +272,13 @@ public final class CodeGenerator extends VisitorAdaptor {
 
         GeneratorContext old = info;
         info = new GeneratorContext();
+        info.continue_ = old.continue_;
 
         node.getSwitch_block().accept(this);
 
         for (CaseData c : info.cases) {
             code.emitop0(dup);
-            items.makeImmediateItem(c.value).load();
+            items.makeImmediateItem(intCode, c.value).load();
             c.entry = mergeChains(c.entry, code.branch(ifeq));
         }
 
@@ -292,6 +294,7 @@ public final class CodeGenerator extends VisitorAdaptor {
 
         selector.drop();
 
+        old.continue_ = info.continue_;
         info = old;
     }
 
@@ -340,6 +343,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         generateStatement(step);
         code.resolve(code.branch(jmp), start);
         code.resolve(loopDone);
+        code.resolve(info.exit);
 
         info = old;
     }
@@ -380,7 +384,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         int fieldCount = type.getFieldCount() + 1;
         code.emitop2(new_, fieldCount * 4);
         code.emitop0(dup);
-        items.makeImmediateItem(clazz.getAddress()).load();
+        items.makeImmediateItem(intCode, clazz.getAddress()).load();
         code.emitop2(putfield, 0);
         result = items.makeStackItem(type);
     }
@@ -443,7 +447,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     @Override
     public void visit(MJPrint node) {
         Item item = generateExpression(node.getExpression()).load();
-        items.makeImmediateItem(1).load();
+        items.makeImmediateItem(intCode, 1).load();
         code.emitop0(getInstruction(item.typecode, print));
         result = items.makeVoidItem();
     }
@@ -451,7 +455,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     @Override
     public void visit(MJPrintConst node) {
         Item item = generateExpression(node.getExpression()).load();
-        items.makeImmediateItem(node.getI2()).load();
+        items.makeImmediateItem(intCode, node.getI2()).load();
         code.emitop0(getInstruction(item.typecode, print));
         result = items.makeVoidItem();
     }
@@ -595,7 +599,7 @@ public final class CodeGenerator extends VisitorAdaptor {
                 Item rightItem = generateExpression(right);
                 int leftValue = ((ImmediateItem) leftItem).value;
                 int rightValue = ((ImmediateItem) rightItem).value;
-                return items.makeImmediateItem(calculate(leftValue, rightValue, opcode));
+                return items.makeImmediateItem(intCode, calculate(leftValue, rightValue, opcode));
             }
             generateExpression(left).load();
             generateExpression(right).load();
@@ -671,15 +675,23 @@ public final class CodeGenerator extends VisitorAdaptor {
         SyntaxNode trueBranch = node.getExpression();
         SyntaxNode falseBranch = node.getConditional_expression();
 
-        Chain thenExit = null;
         ConditionalItem condition = generateConditional(conditional);
+
+        if (condition.isTrue()) {
+            generateExpression(trueBranch).load();
+            return;
+        }
+
+        if (condition.isFalse()) {
+            generateExpression(falseBranch).load();
+            return;
+        }
+
         Chain elseChain = condition.jumpFalse();
 
-        if (!condition.isTrue()) {
-            code.resolve(condition.trueJumps);
-            generateExpression(trueBranch).load();
-            thenExit = code.branch(jmp);
-        }
+        code.resolve(condition.trueJumps);
+        generateExpression(trueBranch).load();
+        Chain thenExit = code.branch(jmp);
 
         if (elseChain != null) {
             code.resolve(elseChain);

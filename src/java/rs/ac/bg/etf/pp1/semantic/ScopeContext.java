@@ -231,6 +231,22 @@ public class ScopeContext {
         }
     }
 
+    public static final class LoopContext extends StatementContext {
+        public LoopContext(ScopeContext outer) {
+            super(outer);
+        }
+
+        @Override
+        public boolean isBreakAllowed() {
+            return true;
+        }
+
+        @Override
+        public boolean isContinueAllowed() {
+            return true;
+        }
+    }
+
     public static final class SwitchContext extends StatementContext {
         Set<Integer> cases = new HashSet<>();
 
