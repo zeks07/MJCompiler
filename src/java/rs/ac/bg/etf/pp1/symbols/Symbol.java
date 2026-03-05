@@ -159,10 +159,8 @@ public interface Symbol {
     }
 
     class ClassSymbol extends MJSymbol {
-        private final SyntaxNode node;
-        public ClassSymbol(String name, Type type, SyntaxNode node) {
+        public ClassSymbol(String name, Type type) {
             super(SymbolKind.TYPE, name, type);
-            this.node = node;
         }
 
         public List<MethodSymbol> getMethods() {
@@ -172,10 +170,6 @@ public interface Symbol {
             }
             return methods;
         }
-
-        public SyntaxNode getNode() {
-            return node;
-        }
     }
 
     class MethodSymbol extends MJSymbol {
@@ -183,7 +177,6 @@ public interface Symbol {
         private Symbol owner;
         private final SyntaxNode node;
         private boolean defined = false;
-        private boolean inherited = false;
         public BytecodeEmitter.Chain forwardReference = null;
 
         public MethodSymbol(String name, Type returnType, SyntaxNode node) {
@@ -359,7 +352,7 @@ public interface Symbol {
 
         @Override
         public boolean isStatic() {
-            return legacy.getLevel() == 0;
+            return getMJKind().isCallable() || legacy.getLevel() == 0;
         }
 
         @Override

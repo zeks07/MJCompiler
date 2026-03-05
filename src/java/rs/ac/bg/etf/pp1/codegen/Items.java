@@ -317,8 +317,13 @@ public final class Items {
         }
 
         Item invoke() {
-            if (!(symbol instanceof MethodSymbol)) {
+            if (!symbol.getMJKind().isCallable()) {
                 throw new AssertionError("Expected method symbol");
+            }
+
+            if (symbol instanceof LegacySymbol) {
+                code.emitCall(symbol.getAddress());
+                return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
             }
 
             MethodSymbol method = (MethodSymbol) symbol;

@@ -91,7 +91,7 @@ public final class Operators {
                 Environment environment,
                 SyntaxNode node
         ) {
-            if (left != BuiltIn.INT || right != BuiltIn.INT) {
+            if (!left.isAssignableTo(BuiltIn.INT) || !right.isAssignableTo(BuiltIn.INT)) {
                 environment.error("Operator `" + symbol + "` cannot be applied to `"
                         + left.getName() + "` and `" + right.getName() + "`.", node);
             }

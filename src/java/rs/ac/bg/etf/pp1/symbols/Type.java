@@ -98,16 +98,19 @@ public interface Type {
         public boolean isCompatibleWith(Type other) {
             return this.equals(other)
                     || this == BuiltIn.NULL && other.getMJKind().isReferencable()
-                    || other == BuiltIn.NULL && this.getMJKind().isReferencable();
+                    || other == BuiltIn.NULL && this.getMJKind().isReferencable()
+                    || this == BuiltIn.INT && other.getMJKind().isEnum()
+                    || other == BuiltIn.INT && this.getMJKind().isEnum();
         }
 
         @Override
         public boolean isAssignableTo(Type other) {
             return this.equals(other)
+                    || isCompatibleWith(other)
                     || (this == BuiltIn.NULL && other.getMJKind().isExtendable())
                     || extendsFrom(other)
                     || (this.kind.isArray() && other.getMJKind().isArray()
-                    && other.getElementType().isAssignableTo(this.getElementType()));
+                        && other.getElementType().isAssignableTo(this.getElementType()));
         }
 
         @Override
@@ -203,7 +206,9 @@ public interface Type {
 
         @Override
         public boolean isAssignableTo(Type other) {
-            return this == other;
+            return this == other
+                    || this.kind == TypeKind.INT && other.getMJKind().isEnum()
+                    || other.getMJKind().isEnum() && this.kind == TypeKind.INT;
         }
 
         @Override

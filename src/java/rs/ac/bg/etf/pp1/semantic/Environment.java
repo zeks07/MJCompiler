@@ -6,6 +6,8 @@ import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.symbols.*;
 import rs.ac.bg.etf.pp1.util.Context;
 
+import java.util.Objects;
+
 import static rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import static rs.ac.bg.etf.pp1.symbols.Type.*;
 
@@ -459,8 +461,13 @@ public final class Environment {
             return;
         }
 
-        if (!(symbol instanceof MethodSymbol)) {
-            throw new AssertionError("Expepcted method symbol");
+        if (!symbol.getMJKind().isCallable()) {
+            throw new AssertionError("Expected method symbol");
+        }
+
+        if (symbol instanceof LegacySymbol) {
+            requireMethodInvocationLegacy(symbol, expressionValue, node);
+            return;
         }
 
         MethodSymbol method = (MethodSymbol) symbol;
@@ -471,6 +478,27 @@ public final class Environment {
                     + ", got "
                     + expressionValue.formatParameterTypes()
                     + ".", node);
+        }
+    }
+
+    private void requireMethodInvocationLegacy(Symbol symbol, ExpressionValue expressionValue, SyntaxNode node) {
+        String name = symbol.getName();
+        if (name.equals("chr")) {
+            requireChr(expressionValue, node);
+        } else if (name.equals("ord")) {
+            requireOrd(expressionValue, node);
+        }
+    }
+
+    private void requireChr(ExpressionValue expressionValue, SyntaxNode node) {
+        if (expressionValue.getList().size() != 1 || BuiltIn.INT.isAssignableTo(expressionValue.getType())) {
+            error("Expected int, got " + expressionValue.formatParameterTypes() + ".", node);
+        }
+    }
+
+    private void requireOrd(ExpressionValue expressionValue, SyntaxNode node) {
+        if (expressionValue.getList().size() != 1 || BuiltIn.CHAR.isAssignableTo(expressionValue.getType())) {
+            error("Expected chr, got " + expressionValue.formatParameterTypes() + ".", node);
         }
     }
 
@@ -492,7 +520,7 @@ public final class Environment {
     }
 
     public Symbol requireArrayAccess(Type type, Type indexType, SyntaxNode node) {
-        if (indexType != BuiltIn.INT) {
+        if (!indexType.isAssignableTo(BuiltIn.INT)) {
             error("Array index must be of type `int'.", node);
         }
 

@@ -1,0 +1,114 @@
+program Test
+
+    const int BASE = 3;
+    const int LIMIT = 5;
+
+    class Node {
+        int value;
+        Node next;
+
+        {
+            int inc(int x) {
+                return x + BASE;
+            }
+
+            void set(int v) {
+                value = v;
+            }
+        }
+    }
+
+    class AdvancedNode extends Node {
+        int extra;
+
+        {
+            int inc(int x) {
+                return x + BASE + extra;
+            }
+
+            void link(Node n) {
+                next = n;
+            }
+        }
+    }
+
+{
+    void helper(int x, int y)
+        int i;
+    {
+        for (i = 0; i < x + y; i++) {
+            if (i % 2 == 0) {
+                print(i);
+            } else {
+                print(i + 100);
+            }
+        }
+    }
+
+    void main()
+        int i, j, sum;
+        bool flag;
+        Node head;
+        AdvancedNode adv;
+        int arr[];
+    {
+        sum = 0;
+        flag = false;
+
+        arr = new int[LIMIT];
+
+        adv = new AdvancedNode;
+
+        head = new Node;
+        head.set(1);
+
+        adv.set(2);
+        adv.extra = 5;
+
+        head.next = adv;
+        adv.link(new Node);
+
+        // array + loop + arithmetic
+        for (i = 0; i < LIMIT; i++) {
+            arr[i] = i * BASE;
+            sum = sum + arr[i];
+        }
+
+        // nested condition with method calls inside expression
+        if (adv.inc(sum) > head.inc(2) && sum != 0) {
+            flag = true;
+        } else {
+            flag = false;
+        }
+
+        // switch with fallthrough
+        switch (sum % 4) {
+            case 0:
+                sum = sum + 1;
+            case 1:
+                sum = sum + 2;
+                break;
+            case 2:
+                sum = sum + 3;
+            case 3:
+                sum = sum + 4;
+        }
+
+        // chained field access + method call
+        head.next.set(head.inc(3));
+
+        // nested loops + side effects
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 2; j++) {
+                sum = sum + i + j;
+            }
+        }
+
+        // boolean-controlled branch
+        if (flag) {
+            helper(sum, BASE);
+        } else {
+            print(sum);
+        }
+    }
+}

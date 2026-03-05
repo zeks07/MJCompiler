@@ -98,6 +98,11 @@ public final class Compiler {
         String fileName = file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3);
         Path output = Paths.get(fileName + ".obj");
 
+        if (diagnostics.hasErrors()) {
+            logger.renderAll(diagnostics.all());
+            return;
+        }
+
         try (OutputStream os = Files.newOutputStream(output)) {
             BytecodeEmitter.write(os);
         } catch (IOException e) {

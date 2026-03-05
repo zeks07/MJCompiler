@@ -56,4 +56,8 @@ public enum TypeKind {
     public int toLegacy() {
         return ordinal();
     }
+
+    public boolean isEnum() {
+        return this == ENUM;
+    }
 }

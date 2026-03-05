@@ -49,7 +49,7 @@ public final class SymbolTable {
         switch (kind) {
             case PROGRAM: symbol = new ProgramSymbol(name); break;
             case METHOD: symbol = new MethodSymbol(name, type, node); break;
-            case TYPE: symbol = new ClassSymbol(name, type, node); break;
+            case TYPE: symbol = new ClassSymbol(name, type); break;
             default: symbol = new MJSymbol(kind, name, type, 0, level);
         }
         if (!Tab.currentScope().addToLocals(symbol)) {
