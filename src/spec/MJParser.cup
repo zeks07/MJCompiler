@@ -53,29 +53,29 @@ terminal NULL_LITERAL;
 terminal String IDENTIFIER;
 
 // Literals, types and names
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue literal, const_literal;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue MJType;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue name, simple_name, qualified_name;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue literal, const_literal;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue MJType;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue name, simple_name, qualified_name;
 
 // Definitions
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.ProgramSymbol program;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.ProgramSymbol program;
 non terminal static_declarations_opt, static_declarations, static_declaration;
 non terminal static_methods_block, static_method_declarations_opt, static_method_declarations, static_method_declarations_element;
 non terminal modifiers_opt, modifiers, modifier;
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.EnumSymbol enum_declaration;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.EnumSymbol enum_declaration;
 non terminal enum_body, enum_entries_opt, enum_entries, enum_entry;
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.ClassSymbol class_delcaration;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.ClassSymbol class_delcaration;
 non terminal super_opt, class_body;
 non terminal member_declarations_opt, member_declarations, member_declaration;
 non terminal field_declaration, variable_declarators;
-non terminal rs.ac.bg.etf.pp1.sem.VariableDeclarator variable_declarator_id;
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.DataHolderSymbol variable_declarator;
+non terminal rs.ac.bg.etf.pp1.semantic.VariableDeclarator variable_declarator_id;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.DataHolderSymbol variable_declarator;
 non terminal methods_block_opt, methods_block;
 non terminal method_declarations_opt, method_declarations, method_declarations_element;
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.MethodSymbol method_declaration;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.MethodSymbol method_declaration;
 non terminal method_signature, method_body;
 non terminal formal_parameters_opt, formal_parameters;
-non terminal rs.ac.bg.etf.pp1.symbol.Symbol.ParameterSymbol formal_parameter;
+non terminal rs.ac.bg.etf.pp1.symbols.Symbol.ParameterSymbol formal_parameter;
 non terminal method_variables_opt, method_variables, method_variable;
 
 // Statements
@@ -97,28 +97,28 @@ non terminal continue_statement;
 non terminal return_statement;
 
 // Expressions
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue primary, primary_no_new_array;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue class_instance_creation_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue argument_list_opt, argument_list;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue array_creation_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue field_access;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue method_invocation;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue array_access;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue postfix_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue postincrement_expression, postdecrement_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue unary_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue multiplicative_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue additive_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue relational_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue equaliity_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue conditional_and_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue conditional_or_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue conditional_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue assignment_expression;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue assignment;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue left_hand_side;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue expression_opt;
-non terminal rs.ac.bg.etf.pp1.sem.ExpressionValue expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue primary, primary_no_new_array;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue class_instance_creation_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue argument_list_opt, argument_list;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue array_creation_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue field_access;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue method_invocation;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue array_access;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue postfix_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue postincrement_expression, postdecrement_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue unary_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue multiplicative_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue additive_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue relational_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue equaliity_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue conditional_and_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue conditional_or_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue conditional_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue assignment_expression;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue assignment;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue left_hand_side;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue expression_opt;
+non terminal rs.ac.bg.etf.pp1.semantic.ExpressionValue expression;
 
 start with program;
 

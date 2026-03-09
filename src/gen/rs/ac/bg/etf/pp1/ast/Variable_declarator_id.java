@@ -11,7 +11,7 @@ public abstract class Variable_declarator_id implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.sem.VariableDeclarator variabledeclarator = null;
+    public rs.ac.bg.etf.pp1.semantic.VariableDeclarator variabledeclarator = null;
 
     public SyntaxNode getParent() {
         return parent;

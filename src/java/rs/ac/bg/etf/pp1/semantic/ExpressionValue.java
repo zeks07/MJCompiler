@@ -1,7 +1,8 @@
-package rs.ac.bg.etf.pp1.sem;
+package rs.ac.bg.etf.pp1.semantic;
 
-import rs.ac.bg.etf.pp1.symbol.Symbol;
-import rs.ac.bg.etf.pp1.symbol.Type;
+import rs.ac.bg.etf.pp1.symbols.Symbol;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
+import rs.ac.bg.etf.pp1.symbols.Type;
 
 public final class ExpressionValue {
     public final Type type;
@@ -11,20 +12,20 @@ public final class ExpressionValue {
 
     public ExpressionValue(Type type) {
         this.type = type;
-        this.symbol = null;
+        this.symbol = SymbolTable.NO_SYMBOL;
         this.isConstant = false;
         this.value = 0;
     }
 
     public ExpressionValue(Type type, int value) {
         this.type = type;
-        this.symbol = null;
+        this.symbol = SymbolTable.NO_SYMBOL;
         this.isConstant = true;
         this.value = value;
     }
 
     public ExpressionValue(Symbol symbol) {
-        this.type = symbol.getMJType();
+        this.type = symbol.getSymbolType();
         this.symbol = symbol;
         this.isConstant = false;
         this.value = 0;

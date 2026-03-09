@@ -11,7 +11,7 @@ public abstract class Enum_declaration implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.EnumSymbol enumsymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.EnumSymbol enumsymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

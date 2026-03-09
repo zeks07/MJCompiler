@@ -9,7 +9,7 @@ public class MJType implements SyntaxNode {
 
     private SyntaxNode parent;
     private int line;
-    public rs.ac.bg.etf.pp1.sem.ExpressionValue expressionvalue = null;
+    public rs.ac.bg.etf.pp1.semantic.ExpressionValue expressionvalue = null;
 
     private String I1;
 

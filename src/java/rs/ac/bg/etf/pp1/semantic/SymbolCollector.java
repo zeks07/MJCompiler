@@ -1,14 +1,14 @@
-package rs.ac.bg.etf.pp1.sem;
+package rs.ac.bg.etf.pp1.semantic;
 
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
-import rs.ac.bg.etf.pp1.symbol.Flags;
-import rs.ac.bg.etf.pp1.symbol.Flags.Modifier;
-import rs.ac.bg.etf.pp1.symbol.Symbol;
-import rs.ac.bg.etf.pp1.symbol.Symbol.*;
-import rs.ac.bg.etf.pp1.symbol.SymbolTable;
-import rs.ac.bg.etf.pp1.symbol.Type;
-import rs.ac.bg.etf.pp1.symbol.Type.*;
+import rs.ac.bg.etf.pp1.symbols.Flags;
+import rs.ac.bg.etf.pp1.symbols.Flags.Modifier;
+import rs.ac.bg.etf.pp1.symbols.Symbol;
+import rs.ac.bg.etf.pp1.symbols.Symbol.*;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
+import rs.ac.bg.etf.pp1.symbols.Type;
+import rs.ac.bg.etf.pp1.symbols.Type.*;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.ac.bg.etf.pp1.util.TreeVisitor;
 
@@ -23,14 +23,12 @@ public final class SymbolCollector extends TreeVisitor {
     private Flags flags;
     private Type type;
 
-    private final Map<MethodSymbol, SyntaxNode> methods = new HashMap<>();
-
     public SymbolCollector(Context context) {
         diagnostics = CompilerDiagnostics.getInstance(context);
         table = SymbolTable.getInstance(context);
     }
 
-    public Map<MethodSymbol, SyntaxNode> enterProgram(MJProgram tree) {
+    public void enterProgram(MJProgram tree) {
         String programName = tree.getI1();
         table.initiate(programName);
 
@@ -38,7 +36,32 @@ public final class SymbolCollector extends TreeVisitor {
         tree.getStatic_methods_block().accept(this);
 
         tree.programsymbol = (ProgramSymbol) table.closeScope();
-        return methods;
+    }
+
+    // Enums
+
+    private int nextEnumIndex = 0;
+
+    @Override
+    public void visit(MJEnumDeclaration tree) {
+        String name = tree.getI1();
+        table.openEnum(name);
+        tree.getEnum_body().accept(this);
+        tree.enumsymbol = (EnumSymbol) table.closeScope();
+    }
+
+    @Override
+    public void visit(MJSimpleEnumEntry tree) {
+        String name = tree.getI1();
+        table.declareConstant(name, SymbolTable.INT, nextEnumIndex++);
+    }
+
+    @Override
+    public void visit(MJEnumEntryWithValue tree) {
+        String name = tree.getI1();
+        int value = tree.getI2();
+        table.declareConstant(name, SymbolTable.INT, value);
+        nextEnumIndex = value + 1;
     }
 
     // Classes
@@ -184,7 +207,11 @@ public final class SymbolCollector extends TreeVisitor {
 
         MethodSymbol method = (MethodSymbol) table.closeScope();
         tree.methodsymbol = method;
-        methods.put(method, tree.getMethod_body());
+        method.setBody(tree.getMethod_body());
+
+        if (table.currentWritable() instanceof ProgramSymbol && method.getName().equals("main")) {
+            method.setMain();
+        }
     }
 
     @Override
@@ -347,6 +374,6 @@ public final class SymbolCollector extends TreeVisitor {
             return SymbolTable.VOID;
         }
 
-        return found.getMJType();
+        return found.getSymbolType();
     }
 }

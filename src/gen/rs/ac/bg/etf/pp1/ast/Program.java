@@ -11,7 +11,7 @@ public abstract class Program implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.ProgramSymbol programsymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.ProgramSymbol programsymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

@@ -11,7 +11,7 @@ public abstract class Method_declaration implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.MethodSymbol methodsymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.MethodSymbol methodsymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

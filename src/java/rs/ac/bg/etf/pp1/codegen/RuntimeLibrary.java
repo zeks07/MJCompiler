@@ -1,6 +1,5 @@
 package rs.ac.bg.etf.pp1.codegen;
 
-import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
 import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.symbols.SymbolTable;
@@ -35,12 +34,12 @@ public final class RuntimeLibrary {
         SymbolTable table = SymbolTable.getInstance(context);
 
         Symbol method = table.find("chr");
-        if (method == BuiltIn.NO_OBJECT) {
+        if (method == SymbolTable.NO_SYMBOL) {
             throw new AssertionError("Expected method symbol");
         }
 
         int pc = code.entryPoint();
-        method.setAddress(pc);
+        method.setAdr(pc);
         code.emitop2(enter, (1 << 8) | 1);
 
         code.emitop0(load_0);
@@ -53,12 +52,12 @@ public final class RuntimeLibrary {
         SymbolTable table = SymbolTable.getInstance(context);
 
         Symbol method = table.find("ord");
-        if (method == BuiltIn.NO_OBJECT) {
+        if (method == SymbolTable.NO_SYMBOL) {
             throw new AssertionError("Expected method symbol");
         }
 
         int pc = code.entryPoint();
-        method.setAddress(pc);
+        method.setAdr(pc);
         code.emitop2(enter, (1 << 8) | 1);
 
         code.emitop0(load_0);

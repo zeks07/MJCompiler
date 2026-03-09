@@ -1,8 +1,11 @@
 package rs.ac.bg.etf.pp1.codegen;
 
 import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
+import rs.ac.bg.etf.pp1.symbols.Type;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.etf.pp1.mj.runtime.Code;
+import rs.etf.pp1.symboltable.concepts.Struct;
 
 import java.io.OutputStream;
 
@@ -109,7 +112,7 @@ public final class BytecodeEmitter {
         }
         emitop0(const_m1);
         emitop2(putstatic, nextStatic++);
-        emitop4(const_, method.getAddress());
+        emitop4(const_, method.getAdr());
         emitop2(putstatic, nextStatic++);
     }
 
@@ -258,6 +261,22 @@ public final class BytecodeEmitter {
         mainPc = -1;
         dataSize = 0;
         greska = false;
+    }
+
+    static int getTypecode(Type type) {
+        if (type == SymbolTable.VOID) return Bytecodes.voidCode;
+
+        switch (type.getKind()) {
+            case Struct.Int: return Bytecodes.intCode;
+            case Struct.Char: return Bytecodes.charCode;
+            case Struct.Bool: return Bytecodes.byteCode;
+            case Struct.Enum: return Bytecodes.voidCode;
+            case Struct.Array:
+            case Struct.Class:
+            case Struct.Interface:
+                return Bytecodes.objectCode;
+            default: throw new AssertionError("Unexpected type: " + type);
+        }
     }
 
     public static void write(OutputStream os) {

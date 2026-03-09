@@ -11,7 +11,7 @@ public abstract class Variable_declarator implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.DataHolderSymbol dataholdersymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.DataHolderSymbol dataholdersymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

@@ -11,7 +11,7 @@ public abstract class Equaliity_expression implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.sem.ExpressionValue expressionvalue = null;
+    public rs.ac.bg.etf.pp1.semantic.ExpressionValue expressionvalue = null;
 
     public SyntaxNode getParent() {
         return parent;

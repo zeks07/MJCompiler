@@ -1,239 +1,260 @@
 package rs.ac.bg.etf.pp1.symbols;
 
 import rs.etf.pp1.symboltable.concepts.Obj;
+import rs.etf.pp1.symboltable.concepts.Scope;
 import rs.etf.pp1.symboltable.concepts.Struct;
-import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
-import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
+import java.lang.annotation.ElementType;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import rs.ac.bg.etf.pp1.symbols.Symbol.*;
+public abstract class Type extends Struct {
+    protected Symbol owner;
 
-public interface Type {
-    String getName();
-    TypeKind getMJKind();
-    void setElementType(Type elementType);
-    Type getElementType();
-    void setMembers(SymbolDataStructure members);
-    Collection<Symbol> getMJMembers();
-    Symbol findMember(String name);
-    boolean isCompatibleWith(Type other);
-    boolean isAssignableTo(Type other);
-    boolean extendsFrom(Type other);
-    void accept(SymbolTableVisitor visitor);
-    int getFieldCount();
-
-    Struct getStruct();
-
-    static Type normalize(Struct structure) {
-        if (structure == null) {
-            return BuiltIn.VOID;
-        }
-
-        Type type = BuiltIn.getBuiltIn(structure);
-        if (type != null) {
-            return type;
-        }
-
-        if (structure instanceof MJType) {
-            return (MJType) structure;
-        }
-
-        return BuiltIn.arrayOf(Type.normalize(structure.getElemType()));
+    public Type(int legacyKind, Symbol owner) {
+        super(legacyKind);
+        this.owner = owner;
     }
 
-    class MJType extends Struct implements Type {
-        private final String name;
-        private final TypeKind kind;
+    public Symbol getOwner() {
+        return owner;
+    }
 
-        public MJType(TypeKind kind, String name) {
-            super(kind.toLegacy());
-            this.kind = kind;
-            this.name = name;
-        }
+    public boolean isPrimitive() {
+        return false;
+    }
 
-        public MJType(TypeKind kind, Type elemType) {
-            super(kind.toLegacy(), elemType.getStruct());
-            this.kind = kind;
-            this.name = elemType.getName() + "[]";
-        }
+    public boolean isReference() { return false; }
 
-        @Override
-        public String getName() {
-            return name;
-        }
+    public boolean isClass() { return false; }
 
-        @Override
-        public TypeKind getMJKind() {
-            return kind;
-        }
+    public boolean isEnum() { return false; }
 
-        @Override
-        public void setElementType(Type elementType) {
-            setElementType(elementType.getStruct());
-        }
+    public boolean isArray() { return false; }
 
-        @Override
-        public Type getElementType() {
-            Struct type = getElemType();
-            return type != null ? Type.normalize(type) : BuiltIn.VOID;
-        }
+    public boolean isVoid() { return false; }
 
-        @Override
-        public Collection<Symbol> getMJMembers() {
-            return getMembers().stream()
-                    .map(Symbol::normalize)
-                    .collect(Collectors.toList());
-        }
+    public boolean assignable(Type other) {
+        if (this == other)
+            return true;
 
-        @Override
-        public Symbol findMember(String name) {
-            Obj found = getMembersTable().searchKey(name);
-            return found != null ? Symbol.normalize(found) : BuiltIn.NO_OBJECT;
-        }
+        return xAssignable(other);
+    }
 
-        @Override
-        public boolean isCompatibleWith(Type other) {
-            return this.equals(other)
-                    || this == BuiltIn.NULL && other.getMJKind().isReferencable()
-                    || other == BuiltIn.NULL && this.getMJKind().isReferencable()
-                    || this == BuiltIn.INT && other.getMJKind().isEnum()
-                    || other == BuiltIn.INT && this.getMJKind().isEnum();
+    protected boolean xAssignable(Type other) {
+        return false;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Type)) return false;
+        Type other = (Type) o;
+        return xEquals(other);
+    }
+
+    protected boolean xEquals(Type other) {
+        return this == other;
+    }
+
+    @Override
+    public String toString() { return getOwner().getName(); }
+
+    public static ArrayType arrayOf(Type elementType) {
+        ArrayType arrayType = new ArrayType(elementType);
+        arrayType.owner = new Symbol.ArrayTypeSymbol(arrayType);
+        return arrayType;
+    }
+
+    public static final class PrimitiveType extends Type {
+        public PrimitiveType(int legacyKind) {
+            super(legacyKind, null);
         }
 
         @Override
-        public boolean isAssignableTo(Type other) {
-            return this.equals(other)
-                    || isCompatibleWith(other)
-                    || (this == BuiltIn.NULL && other.getMJKind().isExtendable())
-                    || extendsFrom(other)
-                    || (this.kind.isArray() && other.getMJKind().isArray()
-                        && other.getElementType().isAssignableTo(this.getElementType()));
-        }
+        public boolean isPrimitive() { return true; }
 
         @Override
-        public boolean extendsFrom(Type other) {
-            if (!kind.isReferencable() || kind.isArray()) return false;
-            Type superType = getElementType();
-            while (superType != BuiltIn.VOID) {
-                if (superType.equals(other)) return true;
-                superType = superType.getElementType();
-            }
-            return false;
-        }
-
-        @Override
-        public int getFieldCount() {
-            int count = 0;
-            for (Symbol member : getMJMembers()) {
-                if (member.getMJKind().isField()) count++;
-            }
-            return count;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (!(other instanceof MJType)) return false;
-            MJType otherType = (MJType) other;
-
-            if (kind.isArray()) {
-                return otherType.kind.isArray() && otherType.getElementType().equals(this.getElementType());
-            }
-
-            if (kind.isClass()) {
-                return otherType.kind.isClass() && otherType.getMembersTable().equals(this.getMembersTable());
-            }
-
-            return this == other;
-        }
-
-        @Override
-        public Struct getStruct() {
-            return this;
+        protected boolean xAssignable(Type other) {
+            if (other.isEnum() && getKind() == Struct.Int)
+                return true;
+            return getKind() == other.getKind();
         }
     }
 
-    class LegacyType implements Type {
-        private final Struct legacy;
-        private final String name;
-        private final TypeKind kind;
+    public interface Accessible {
+        Symbol find(String name);
+    }
 
-        public LegacyType(Struct legacy, String name) {
-            this.legacy = legacy;
-            this.kind = TypeKind.normalize(legacy.getKind());
-            this.name = name;
+    public static final class EnumType extends Type implements Accessible {
+        Scope scope;
+        public EnumType(Scope scope) {
+            super(Struct.Enum, null);
+            this.scope = scope;
         }
 
         @Override
-        public String getName() {
-            return name;
+        public boolean isEnum() { return true; }
+
+        public void addElement(Symbol symbol) {
+            scope.addToLocals(symbol);
+        }
+
+        public Symbol find(String name) {
+            Obj symbol = scope.findSymbol(name);
+            if (symbol != null)
+                return (Symbol) symbol;
+            return SymbolTable.NO_SYMBOL;
+        }
+
+        public void write() {
+            setMembers(scope.getLocals());
         }
 
         @Override
-        public TypeKind getMJKind() {
-            return kind;
-        }
+        protected boolean xAssignable(Type other) {
+            if (other.getKind() == Struct.Int)
+                return true;
 
-        @Override
-        public void setElementType(Type elementType) {
-        }
-
-        @Override
-        public Type getElementType() {
-            return BuiltIn.VOID;
-        }
-
-        @Override
-        public void setMembers(SymbolDataStructure members) {
-        }
-
-        @Override
-        public Collection<Symbol> getMJMembers() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public Symbol findMember(String name) {
-            return BuiltIn.NO_OBJECT;
-        }
-
-        @Override
-        public boolean isCompatibleWith(Type other) {
             return this == other;
         }
+    }
 
-        @Override
-        public boolean isAssignableTo(Type other) {
-            return this == other
-                    || this.kind == TypeKind.INT && other.getMJKind().isEnum()
-                    || other.getMJKind().isEnum() && this.kind == TypeKind.INT;
+    public static abstract class ReferenceType extends Type {
+        public ReferenceType(int legacyKind, Symbol owner) {
+            super(legacyKind, owner);
         }
 
         @Override
-        public boolean extendsFrom(Type other) {
-            return false;
+        public boolean isReference() { return true; }
+    }
+
+    public static final class ArrayType extends ReferenceType {
+        public ArrayType(Type elementType) {
+            super(Struct.Array, null);
+            setElementType(elementType);
+        }
+
+        public Type getElementType() { return (Type) getElemType(); }
+
+        @Override
+        public boolean isArray() { return true; }
+
+        @Override
+        protected boolean xAssignable(Type other) {
+            return xEquals(other);
         }
 
         @Override
-        public void accept(SymbolTableVisitor visitor) {
-            visitor.visitStructNode(legacy);
+        protected boolean xEquals(Type other) {
+            if (!other.isArray())
+                return false;
+
+            return getElementType().equals(((ArrayType) other).getElementType());
+        }
+    }
+
+    public static final class ClassType extends ReferenceType implements Accessible {
+        Scope scope;
+        private int size = 4;
+
+        public ClassType(ClassType superType, Scope scope) {
+            super(Struct.Class, null);
+            this.scope = scope;
+            setElementType(superType);
+            inheritFields();
+        }
+
+        private void inheritFields() {
+            if (getSuperType() == null) return;
+
+            getSuperType().getClassMembers().stream()
+                    .filter(Symbol::isField)
+                    .forEach(this::addMember);
+        }
+
+        public ClassType getSuperType() {
+            return (ClassType) getElemType();
         }
 
         @Override
-        public int getFieldCount() {
-            return 0;
+        public boolean isClass() { return true; }
+
+        public void addMember(Symbol symbol) {
+            scope.addToLocals(symbol);
+            if (symbol.isField()) size += 4;
+        }
+
+        public void write() {
+            setMembers(scope.getLocals());
+        }
+
+        public Symbol find(String name) {
+            Obj symbol = scope.findSymbol(name);
+            if (symbol != null)
+                return (Symbol) symbol;
+
+            if (getSuperType() != null)
+                return getSuperType().find(name);
+
+            return SymbolTable.NO_SYMBOL;
+        }
+
+        public Symbol findOwn(String name) {
+            Obj symbol = scope.findSymbol(name);
+            if (symbol != null)
+                return (Symbol) symbol;
+
+            return SymbolTable.NO_SYMBOL;
+        }
+
+        public Collection<Symbol> getClassMembers() {
+            return getMembers().stream().map(obj -> (Symbol) obj).collect(java.util.stream.Collectors.toList());
+        }
+
+        public List<Symbol.MethodSymbol> getMethods() {
+            return getClassMembers().stream()
+                    .filter(Symbol::isCallable)
+                    .map(symbol -> (Symbol.MethodSymbol) symbol)
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        public int getSize() { return size; }
+
+        @Override
+        protected boolean xAssignable(Type other) {
+            if (!other.isClass())
+                return false;
+
+            return extendsFrom((ClassType) other);
+        }
+
+        public boolean extendsFrom(ClassType other) {
+            if (getSuperType() == null)
+                return false;
+
+            if (getSuperType().equals(other))
+                return true;
+
+            return getSuperType().extendsFrom(other);
+        }
+    }
+
+    public static final class NullType extends ReferenceType {
+        public NullType() {
+            super(Struct.Class, null);
         }
 
         @Override
-        public Struct getStruct() {
-            return legacy;
+        protected boolean xAssignable(Type other) { return other.isReference(); }
+    }
+
+    public static final class VoidType extends Type {
+        public VoidType() {
+            super(Struct.None, null);
         }
 
         @Override
-        public boolean equals(Object obj) {
-            return obj instanceof LegacyType && ((LegacyType) obj).legacy == legacy;
-        }
+        public boolean isVoid() { return true; }
     }
 }

@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.pp1.sem;
+package rs.ac.bg.etf.pp1.semantic;
 
 public final class VariableDeclarator {
     public final String name;

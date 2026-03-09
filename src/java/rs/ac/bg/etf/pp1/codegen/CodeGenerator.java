@@ -2,11 +2,13 @@ package rs.ac.bg.etf.pp1.codegen;
 
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.codegen.Items.*;
-import rs.ac.bg.etf.pp1.symbols.BuiltIn;
 import rs.ac.bg.etf.pp1.symbols.Symbol;
 import rs.ac.bg.etf.pp1.symbols.Symbol.*;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
 import rs.ac.bg.etf.pp1.symbols.Type;
+import rs.ac.bg.etf.pp1.symbols.Type.*;
 import rs.ac.bg.etf.pp1.util.Context;
+import rs.ac.bg.etf.pp1.util.TreeVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
 import static rs.ac.bg.etf.pp1.codegen.Bytecodes.*;
 import static rs.ac.bg.etf.pp1.codegen.BytecodeEmitter.*;
 
-public final class CodeGenerator extends VisitorAdaptor {
+public final class CodeGenerator extends TreeVisitor {
     private final BytecodeEmitter code;
     private final Items items;
     private List<ClassSymbol> classes;
@@ -37,9 +39,9 @@ public final class CodeGenerator extends VisitorAdaptor {
 
         for (ClassSymbol clazz : classes) {
             currentClass = clazz;
-            if (!clazz.getSymbolType().getMJKind().isClass()) continue;
+            if (!clazz.getSymbolType().isClass()) continue;
 
-            List<MethodSymbol> classMethods = clazz.getMethods();
+            List<MethodSymbol> classMethods = clazz.getThisType().getMethods();
 
             for (MethodSymbol method : classMethods) {
                 generateMethod(method);
@@ -59,18 +61,17 @@ public final class CodeGenerator extends VisitorAdaptor {
         if (method.getOwner() != currentClass && currentClass != null)
             return;
 
-        Method_body node = (Method_body) method.getNode();
+        Method_body node = (Method_body) method.getBody();
 
         if (node instanceof MJAbstractMethodBody) {
             return;
         }
 
         int entry = code.entryPoint();
-        method.setAddress(entry);
+        method.setAdr(entry);
         code.emitop2(enter, (method.getLevel() << 8) | (method.getLocalSymbols().size() & 0xFF));
 
-        String name = method.getName();
-        if (name.equals("main")) {
+        if (method.isMain()) {
             generateVFT(classes);
             code.setMain(entry);
         }
@@ -82,7 +83,7 @@ public final class CodeGenerator extends VisitorAdaptor {
             return;
         }
 
-        if (method.getSymbolType().getMJKind().isVoid()) {
+        if (method.getSymbolType().isVoid()) {
             code.emitop0(exit);
             code.emitop0(return_);
         } else {
@@ -94,8 +95,8 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     private void generateVFT(List<ClassSymbol> classes) {
         for (ClassSymbol clazz : classes) {
-            clazz.setAddress(code.getNextStatic());
-            List<MethodSymbol> methods = clazz.getMethods();
+            clazz.setAdr(code.getNextStatic());
+            List<MethodSymbol> methods = clazz.getThisType().getMethods();
             if (methods.isEmpty()) continue;
 
             for (MethodSymbol method : methods) {
@@ -107,7 +108,7 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJNullLiteral node) {
-        result = items.makeStackItem(BuiltIn.NULL);
+        result = items.makeStackItem(SymbolTable.NULL);
     }
 
     @Override
@@ -127,9 +128,9 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJSimpleName node) {
-        Symbol symbol = node.expressionvalue.getSymbol();
-        if (symbol.getMJKind().isConstant()) {
-            result = items.makeImmediateItem(symbol.getSymbolType().getMJKind().getTypecode(), symbol.getAddress());
+        Symbol symbol = node.expressionvalue.symbol;
+        if (symbol.isConstant()) {
+            result = items.makeImmediateItem(BytecodeEmitter.getTypecode(symbol.getSymbolType()), symbol.getAdr());
         } else if (symbol.isStatic()) {
             result = items.makeStaticItem(symbol);
         } else if (symbol.isMember()) {
@@ -142,9 +143,10 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJQualifiedName node) {
-        Symbol symbol = node.expressionvalue.getSymbol();
-        if (symbol.getMJKind().isType()) {
-            result = items.makeImmediateItem(symbol.getSymbolType().getMJKind().getTypecode(), symbol.getAddress());
+        Symbol qualifier = node.getName().expressionvalue.symbol;
+        Symbol symbol = node.expressionvalue.symbol;
+        if (qualifier.isType()) {
+            result = items.makeImmediateItem(BytecodeEmitter.getTypecode(symbol.getSymbolType()), symbol.getAdr());
         } else {
             generateExpression(node.getName()).load();
             result = items.makeMemberItem(symbol);
@@ -155,7 +157,7 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJLength node) {
         generateExpression(node.getName()).load();
         code.emitop0(arraylength);
-        result = items.makeStackItem(BuiltIn.INT);
+        result = items.makeStackItem(SymbolTable.INT);
     }
 
     @Override
@@ -379,40 +381,39 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJClassInstanceCreation node) {
-        Symbol clazz = node.expressionvalue.getSymbol();
-        Type type = node.expressionvalue.getType();
-        int fieldCount = type.getFieldCount() + 1;
-        code.emitop2(new_, fieldCount * 4);
+        Symbol clazz = node.expressionvalue.symbol;
+        ClassType type = (ClassType) node.expressionvalue.type;
+        code.emitop2(new_, type.getSize());
         code.emitop0(dup);
-        items.makeImmediateItem(intCode, clazz.getAddress()).load();
+        items.makeImmediateItem(intCode, clazz.getAdr()).load();
         code.emitop2(putfield, 0);
         result = items.makeStackItem(type);
     }
 
     @Override
     public void visit(MJArrayCreation node) {
-        Type arrayType = node.expressionvalue.getType().getElementType();
+        Type arrayType = ((ArrayType) node.expressionvalue.type).getElementType();
         generateExpression(node.getExpression()).load();
-        code.emitop1(newarray, arrayType == BuiltIn.CHAR ? 0 : 1);
+        code.emitop1(newarray, arrayType == SymbolTable.CHAR ? 0 : 1);
         result = items.makeStackItem(arrayType);
     }
 
     @Override
     public void visit(MJFieldAccess node) {
         generateExpression(node.getPrimary()).load();
-        result = items.makeMemberItem(node.expressionvalue.getSymbol());
+        result = items.makeMemberItem(node.expressionvalue.symbol);
     }
 
     @Override
     public void visit(MJLengthFieldAcces node) {
         generateExpression(node.getPrimary()).load();
         code.emitop0(arraylength);
-        result = items.makeStackItem(BuiltIn.INT);
+        result = items.makeStackItem(SymbolTable.INT);
     }
 
     @Override
     public void visit(MJMethodInvocation node) {
-        Symbol method = node.expressionvalue.getSymbol();
+        Symbol method = node.expressionvalue.symbol;
         if (method.isMember()) {
             generateExpression(node.getName());
         }
@@ -423,13 +424,13 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJQualifiedMethodInvocation node) {
-        Symbol method = node.expressionvalue.getSymbol();
+        Symbol method = node.expressionvalue.symbol;
         if (method.isMember()) {
             generateExpression(node.getPrimary()).load();
         }
         generateExpression(node.getPrimary()).load();
         generateArguments(node.getArgument_list_opt());
-        Item item = items.makeMemberItem(node.expressionvalue.getSymbol());
+        Item item = items.makeMemberItem(node.expressionvalue.symbol);
         result = item.invoke();
     }
 
@@ -476,14 +477,14 @@ public final class CodeGenerator extends VisitorAdaptor {
     public void visit(MJArrayAccess node) {
         generateExpression(node.getName()).load();
         generateExpression(node.getExpression()).load();
-        result = items.makeIndexedItem(node.expressionvalue.getType());
+        result = items.makeIndexedItem(node.expressionvalue.type);
     }
 
     @Override
     public void visit(MJQualifiedArrayAccess node) {
         generateExpression(node.getPrimary_no_new_array()).load();
         generateExpression(node.getExpression()).load();
-        result = items.makeIndexedItem(node.expressionvalue.getType());
+        result = items.makeIndexedItem(node.expressionvalue.type);
     }
 
     @Override
@@ -605,7 +606,7 @@ public final class CodeGenerator extends VisitorAdaptor {
             generateExpression(left).load();
             generateExpression(right).load();
             code.emitop0(opcode);
-            return items.makeStackItem(BuiltIn.INT);
+            return items.makeStackItem(SymbolTable.INT);
         } else {
             throw new AssertionError("Unexpected opcode: " + opcode);
         }
@@ -613,13 +614,13 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     private static boolean isConstant(SyntaxNode node) {
         if (node instanceof Multiplicative_expression) {
-            return ((Multiplicative_expression) node).expressionvalue.isConstant();
+            return ((Multiplicative_expression) node).expressionvalue.isConstant;
         } else if (node instanceof Additive_expression) {
-            return ((Additive_expression) node).expressionvalue.isConstant();
+            return ((Additive_expression) node).expressionvalue.isConstant;
         } else if (node instanceof Relational_expression) {
-            return ((Relational_expression) node).expressionvalue.isConstant();
+            return ((Relational_expression) node).expressionvalue.isConstant;
         } else if (node instanceof Equaliity_expression) {
-            return ((Equaliity_expression) node).expressionvalue.isConstant();
+            return ((Equaliity_expression) node).expressionvalue.isConstant;
         } else {
             return false;
         }
@@ -700,7 +701,7 @@ public final class CodeGenerator extends VisitorAdaptor {
         }
 
         code.resolve(thenExit);
-        result = items.makeStackItem(node.expressionvalue.getType());
+        result = items.makeStackItem(node.expressionvalue.type);
     }
 
     @Override
@@ -727,327 +728,4 @@ public final class CodeGenerator extends VisitorAdaptor {
     private ConditionalItem generateConditional(SyntaxNode node) {
         return generateExpression(node).asConditional();
     }
-
-    // <editor-fold defaultstate="collapsed" desc="Traversal methods">
-
-    @Override
-    public void visit(MJConstLiteral node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNameSimple node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNameQualified node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJMethodBody node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJBlock node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJBlockStatements node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextStatementExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJFirstBlockStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextBlockStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJBlockStatement node) {
-        generateStatement(node.getStatement());
-    }
-
-    @Override
-    public void visit(MJStatementWithoutTrailingSubstatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJIfThenStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJIfThenElseStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJForStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJStatementWithoutTrailingSubstatementNoShortIf node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJIfThenElseStatementNoShortIf node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJIfCondition node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJForNoShortIf node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJExpressionStatement node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJStatementBlock node) {
-        generateStatement(node.getBlock());
-    }
-
-    @Override
-    public void visit(MJSwitchStatement node) {
-        generateStatement(node.getSwitch_statement());
-    }
-
-    @Override
-    public void visit(MJForInitOpt node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJForInit node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJForUpdateOpt node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJForUpdate node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJFirstStatementExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJFirstSwitchLabel node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextSwitchLabel node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJSwitchLabel node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJSwitchStatements node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJFirstSwitchStatementGroups node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNextSwitchStatementsGroups node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJBreakStatement node) {
-        generateStatement(node.getBreak_statement());
-    }
-
-    @Override
-    public void visit(MJContinueStatement node) {
-        generateStatement(node.getContinue_statement());
-    }
-
-    @Override
-    public void visit(MJReturnStatement node) {
-        generateStatement(node.getReturn_statement());
-    }
-
-    @Override
-    public void visit(MJStatementExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJClassInstanceCreationStatementExpression node) {
-        generateStatement(node.getClass_instance_creation_expression());
-    }
-
-    @Override
-    public void visit(MJPrimaryNoNewArray node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryClassInstanceCreationExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryArrayCreationExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryLiteral node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryFieldAccess node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryMethodInvocation node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryArrayAccess node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJArgumentList node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPrimaryExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJNameExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPostincrementExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPostdecrementExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJPostfixExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJUnaryExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJMultiplicativeExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJAdditiveExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJRelationalExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJEqualityExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJConditionalAndExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJConditionalOrExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJConditionalExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJAssignmentExpression node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJLeftHandSideName node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJLeftHandSideFieldAccress node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJLeftHandSideArrayAccess node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJExpressionOption node) {
-        node.childrenAccept(this);
-    }
-
-    @Override
-    public void visit(MJExpression node) {
-        node.childrenAccept(this);
-    }
-    // </editor-fold>
 }

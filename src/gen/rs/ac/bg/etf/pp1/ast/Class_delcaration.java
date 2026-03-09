@@ -11,7 +11,7 @@ public abstract class Class_delcaration implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.ClassSymbol classsymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.ClassSymbol classsymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

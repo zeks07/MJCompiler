@@ -11,7 +11,7 @@ public abstract class Formal_parameter implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbol.Symbol.ParameterSymbol parametersymbol = null;
+    public rs.ac.bg.etf.pp1.symbols.Symbol.ParameterSymbol parametersymbol = null;
 
     public SyntaxNode getParent() {
         return parent;

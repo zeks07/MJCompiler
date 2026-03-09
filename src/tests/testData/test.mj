@@ -5,7 +5,7 @@ program test_303
 const int cinilac = 4, delilac = 3;
 abstract class AbsPredmet
 {
-    {
+	{
 		abstract int zapremina();
 		abstract int Q();
 	}

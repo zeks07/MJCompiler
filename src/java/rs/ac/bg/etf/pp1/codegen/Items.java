@@ -68,8 +68,8 @@ public final class Items {
         return new ConditionalItem(opcode, null, null, fromRelational);
     }
 
-    public Item makeStackItem(Type type) {
-        return new StackItem(type.getMJKind().getTypecode());
+    Item makeStackItem(Type type) {
+        return new StackItem(BytecodeEmitter.getTypecode(type));
     }
 
     abstract class Item {
@@ -137,7 +137,7 @@ public final class Items {
 
     final class IndexedItem extends Item {
         IndexedItem(Type type) {
-            super(type.getMJKind().getTypecode());
+            super(BytecodeEmitter.getTypecode(type));
         }
 
         @Override
@@ -192,8 +192,8 @@ public final class Items {
         private final int position;
 
         LocalItem(Symbol symbol) {
-            super(symbol.getSymbolType().getMJKind().getTypecode());
-            this.position = symbol.getAddress();
+            super(BytecodeEmitter.getTypecode(symbol.getSymbolType()));
+            this.position = symbol.getAdr();
         }
 
         @Override
@@ -236,29 +236,29 @@ public final class Items {
         private final Symbol symbol;
 
         MemberItem(Symbol symbol) {
-            super(symbol.getSymbolType().getMJKind().getTypecode());
+            super(BytecodeEmitter.getTypecode(symbol.getSymbolType()));
             this.symbol = symbol;
         }
 
         @Override
         Item load() {
-            if (symbol.getMJKind().isCallable()) {
+            if (symbol.isCallable()) {
                 code.emitop2(getfield, 0);
             } else {
-                code.emitop2(getfield, symbol.getAddress() + 1);
+                code.emitop2(getfield, symbol.getAdr() + 1);
             }
             return stackItem[typecode];
         }
 
         @Override
         void store() {
-            code.emitop2(putfield, symbol.getAddress() + 1);
+            code.emitop2(putfield, symbol.getAdr() + 1);
         }
 
         Item invoke() {
             load();
             code.emitInvokevirtual(symbol.getName());
-            return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
+            return stackItem[BytecodeEmitter.getTypecode(symbol.getSymbolType())];
         }
     }
 
@@ -292,39 +292,34 @@ public final class Items {
         private final Symbol symbol;
 
         StaticItem(Symbol symbol) {
-            super(symbol.getSymbolType().getMJKind().getTypecode());
+            super(BytecodeEmitter.getTypecode(symbol.getSymbolType()));
             this.symbol = symbol;
         }
 
         @Override
         Item load() {
-            code.emitop2(getstatic, symbol.getAddress());
+            code.emitop2(getstatic, symbol.getAdr());
             return stackItem[typecode];
         }
 
         @Override
         void store() {
-            code.emitop2(putstatic, symbol.getAddress());
+            code.emitop2(putstatic, symbol.getAdr());
         }
 
         Item invoke() {
-            if (!symbol.getMJKind().isCallable()) {
+            if (!symbol.isCallable()) {
                 throw new AssertionError("Expected method symbol");
-            }
-
-            if (symbol instanceof LegacySymbol) {
-                code.emitCall(symbol.getAddress());
-                return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
             }
 
             MethodSymbol method = (MethodSymbol) symbol;
             if (method.isDefined()) {
-                code.emitCall(method.getAddress());
+                code.emitCall(method.getAdr());
             } else {
                 method.forwardReference = code.emitCall(method.forwardReference);
             }
 
-            return stackItem[symbol.getSymbolType().getMJKind().getTypecode()];
+            return stackItem[BytecodeEmitter.getTypecode(symbol.getSymbolType())];
         }
     }
 
