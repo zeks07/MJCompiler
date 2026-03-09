@@ -439,8 +439,9 @@ public final class CodeGenerator extends VisitorAdaptor {
 
     @Override
     public void visit(MJRead node) {
-        Item item = generateExpression(node.getExpression()).load(); // generate argument
+        Item item = generateExpression(node.getExpression()); // generate argument
         code.emitop0(getInstruction(item.typecode, read));
+        item.store();
         result = items.makeVoidItem();
     }
 

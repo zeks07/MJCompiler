@@ -71,9 +71,11 @@ public final class SymbolTable {
         return BuiltIn.NO_OBJECT;
     }
 
-    public Symbol findInThisScope(String name) {
+    public Symbol findInThisScope(String name, Type classType) {
         if (Tab.currentScope().getLocals() == null) return BuiltIn.NO_OBJECT;
-        return Symbol.normalize(Tab.currentScope().getOuter().getLocals().searchKey(name));
+        Symbol symbol = Symbol.normalize(Tab.currentScope().getOuter().getLocals().searchKey(name));
+        if (symbol != BuiltIn.NO_OBJECT) return symbol;
+        return classType.getElementType().findMember(name);
     }
 
     public boolean isInScope(String name) {

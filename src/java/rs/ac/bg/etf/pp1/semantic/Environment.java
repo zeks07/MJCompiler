@@ -404,7 +404,7 @@ public final class Environment {
 
         Symbol member;
         if (type == context.getThisType()) {
-            member = table.findInThisScope(field);
+            member = table.findInThisScope(field, type);
         } else {
             member = type.findMember(field);
         }
@@ -418,7 +418,12 @@ public final class Environment {
     // Expressions
 
     public Symbol find(String name, SyntaxNode node) {
-        Symbol symbol = table.find(name);
+        Symbol symbol;
+        if (isInClass()) {
+            symbol = table.findInThisScope(name, context.getThisType());
+        } else {
+            symbol = table.find(name);
+        }
 
         if (symbol == BuiltIn.NO_OBJECT) {
             error("Cannot resolve symbol `" + name + "'.", node);

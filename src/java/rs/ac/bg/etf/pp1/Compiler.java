@@ -3,22 +3,16 @@ package rs.ac.bg.etf.pp1;
 import java_cup.runtime.Scanner;
 import java_cup.runtime.Symbol;
 import rs.ac.bg.etf.pp1.ast.MJProgram;
-import rs.ac.bg.etf.pp1.ast.Program;
-import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
-import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
-import rs.ac.bg.etf.pp1.codegen.RuntimeLibrary;
+import rs.ac.bg.etf.pp1.ast.SyntaxNode;
+import rs.ac.bg.etf.pp1.symbol.Symbol.*;
 import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
-import rs.ac.bg.etf.pp1.semantic.SemanticAnalyser;
-import rs.ac.bg.etf.pp1.symbols.BuiltIn;
+import rs.ac.bg.etf.pp1.sem.SymbolCollector;
 import rs.ac.bg.etf.pp1.util.Context;
-import rs.etf.pp1.mj.runtime.disasm;
-import rs.etf.pp1.symboltable.Tab;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 public final class Compiler {
     public static void main(String[] args) {
@@ -75,45 +69,40 @@ public final class Compiler {
             return;
         }
 
-        Program program = (Program) symbol.value;
+        MJProgram program = (MJProgram) symbol.value;
 
-        Tab.init();
-        BuiltIn.init();
-        BytecodeEmitter.reset();
-
-        SemanticAnalyser analyser = new SemanticAnalyser(context);
-
-        program.accept(analyser);
+        SymbolCollector analyser = new SymbolCollector(context);
+        Map<MethodSymbol, SyntaxNode> methods = analyser.enterProgram(program);
 
         if (diagnostics.hasErrors()) {
             logger.renderAll(diagnostics.all());
             return;
         }
 
-        RuntimeLibrary.emit(context);
-
-        CodeGenerator generator = new CodeGenerator(context);
-        generator.generateProgram((MJProgram) program);
-
-        String fileName = file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3);
-        Path output = Paths.get(fileName + ".obj");
-
-        if (diagnostics.hasErrors()) {
-            logger.renderAll(diagnostics.all());
-            return;
-        }
-
-        try (OutputStream os = Files.newOutputStream(output)) {
-            BytecodeEmitter.write(os);
-        } catch (IOException e) {
-            System.err.println("Failed to write bytecode to file `" + output);
-        }
-
-        if (diagnostics.hasErrors()) {
-            logger.renderAll(diagnostics.all());
-            return;
-        }
-
-        disasm.main( new String[] { output.toString() });
+//        RuntimeLibrary.emit(context);
+//
+//        CodeGenerator generator = new CodeGenerator(context);
+//        generator.generateProgram((MJProgram) program);
+//
+//        String fileName = file.getAbsolutePath().substring(0, file.getAbsolutePath().length() - 3);
+//        Path output = Paths.get(fileName + ".obj");
+//
+//        if (diagnostics.hasErrors()) {
+//            logger.renderAll(diagnostics.all());
+//            return;
+//        }
+//
+//        try (OutputStream os = Files.newOutputStream(output)) {
+//            BytecodeEmitter.write(os);
+//        } catch (IOException e) {
+//            System.err.println("Failed to write bytecode to file `" + output);
+//        }
+//
+//        if (diagnostics.hasErrors()) {
+//            logger.renderAll(diagnostics.all());
+//            return;
+//        }
+//
+//        disasm.main( new String[] { output.toString() });
     }
 }

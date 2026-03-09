@@ -1,6 +1,6 @@
 // generated with ast extension for cup
 // version 0.8
-// 3/2/2026 16:57:9
+// 8/2/2026 1:48:26
 
 
 package rs.ac.bg.etf.pp1.ast;
@@ -262,7 +262,6 @@ public interface Visitor {
     public void visit(MJVariableDeclarator MJVariableDeclarator);
     public void visit(MJFieldDeclaration MJFieldDeclaration);
     public void visit(MJMemberDeclarationError MJMemberDeclarationError);
-    public void visit(MJAbstractMethodDeclaration MJAbstractMethodDeclaration);
     public void visit(MJClassFieldDeclaration MJClassFieldDeclaration);
     public void visit(MJNextFieldDeclaration MJNextFieldDeclaration);
     public void visit(MJMemberDeclaration MJMemberDeclaration);

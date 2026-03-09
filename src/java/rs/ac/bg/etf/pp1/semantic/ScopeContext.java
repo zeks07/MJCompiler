@@ -205,6 +205,11 @@ public class ScopeContext {
         }
 
         @Override
+        public boolean isInClass() {
+            return outer.isInClass();
+        }
+
+        @Override
         public boolean isThisAllowed() {
             return outer.isThisAllowed();
         }

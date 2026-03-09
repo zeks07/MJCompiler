@@ -45,7 +45,10 @@ public interface Symbol {
         SymbolKind kind = SymbolKind.normalize(object.getKind());
         Type type = Type.normalize(object.getType());
 
-        return new MJSymbol(kind, object.getName(), type);
+        Symbol result = new MJSymbol(kind, object.getName(), type);
+        result.setAddress(object.getAdr());
+
+        return result;
     }
 
     class MJSymbol extends Obj implements Symbol {
@@ -159,6 +162,8 @@ public interface Symbol {
     }
 
     class ClassSymbol extends MJSymbol {
+        private List<MethodSymbol> methods = new ArrayList<>();
+
         public ClassSymbol(String name, Type type) {
             super(SymbolKind.TYPE, name, type);
         }

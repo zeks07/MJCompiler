@@ -1,6 +1,6 @@
 // generated with ast extension for cup
 // version 0.8
-// 3/2/2026 16:57:9
+// 8/2/2026 1:48:25
 
 
 package rs.ac.bg.etf.pp1.ast;
@@ -11,7 +11,7 @@ public abstract class Class_instance_creation_expression implements SyntaxNode {
 
     private int line;
 
-    public rs.ac.bg.etf.pp1.symbols.ExpressionValue expressionvalue = null;
+    public rs.ac.bg.etf.pp1.sem.ExpressionValue expressionvalue = null;
 
     public SyntaxNode getParent() {
         return parent;

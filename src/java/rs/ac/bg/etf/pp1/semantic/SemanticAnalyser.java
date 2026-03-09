@@ -238,11 +238,6 @@ public final class SemanticAnalyser extends VisitorAdaptor {
             node.getField_declaration().accept(variableDeclarationVisitor);
         }
 
-        @Override
-        public void visit(MJAbstractMethodDeclaration node) {
-            environment.requireAbstractMethod(node);
-            node.getMethod_declaration().accept(methodDeclarationVisitor);
-        }
 
         @Override
         public void visit(MJMethodsBlockOption node) {

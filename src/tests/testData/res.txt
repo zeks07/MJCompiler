@@ -1,5 +1,5 @@
-C:\Users\zeljk\.jdks\temurin-1.8.0_482\bin\java.exe "-javaagent:C:\Users\zeljk\AppData\Local\Programs\IntelliJ IDEA Ultimate\lib\idea_rt.jar=63265" -Dfile.encoding=UTF-8 -classpath C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\charsets.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\access-bridge-64.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\cldrdata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\dnsns.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\jaccess.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\localedata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\nashorn.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunec.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunjce_provider.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunmscapi.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunpkcs11.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\zipfs.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jce.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jfr.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jsse.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\management-agent.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\resources.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\rt.jar;C:\Users\zeljk\Projects\2026\MJCompiler\out\production\MJCompiler;C:\Users\zeljk\Projects\2026\MJCompiler\lib\cup_v10k.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\JFlex.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
-codeSize=546
+"C:\Program Files\Java\jdk-23\bin\java.exe" "-javaagent:C:\Users\oz200660d\AppData\Local\Programs\IntelliJ IDEA\lib\idea_rt.jar=61607" -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath C:\Users\oz200660d\Projects\MJCompiler\out\production\MJCompiler;C:\Users\oz200660d\Projects\MJCompiler\lib\cup_v10k.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\JFlex.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
+codeSize=562
 dataSize=3
 mainPC=60
 0: enter 1 1
@@ -127,173 +127,173 @@ mainPC=60
 221: call -215 (=6)
 224: const_1
 225: print
-226: const_0
-227: const_1
-228: bprint
-229: const_0
-230: putstatic 0
-233: getstatic 0
-236: const 10
-241: jge 46 (=287)
-244: getstatic 0
-247: const_3
-248: jne 16 (=264)
-251: getstatic 0
-254: dup
-255: const_1
-256: add
-257: putstatic 0
-260: pop
-261: jmp -28 (=233)
-264: getstatic 0
-267: const_4
-268: jne 6 (=274)
-271: jmp 16 (=287)
-274: getstatic 0
-277: const_1
-278: call -258 (=20)
-281: putstatic 0
-284: jmp -51 (=233)
-287: getstatic 0
-290: const_3
-291: jne 16 (=307)
-294: call -247 (=47)
-297: const_0
-298: jeq 9 (=307)
-301: const_4
-302: const_1
-303: print
-304: jmp 7 (=311)
-307: const_4
-308: neg
-309: const_1
-310: print
-311: getstatic 2
-314: const_0
-315: aload
-316: read
-317: getstatic 2
-320: const_1
-321: aload
-322: read
-323: getstatic 2
-326: const_2
-327: aload
-328: read
-329: const_0
-330: const_1
-331: bprint
-332: getstatic 2
-335: const_0
-336: aload
-337: getstatic 2
-340: const_1
-341: aload
-342: call -330 (=12)
+226: const 10
+231: const_1
+232: bprint
+233: const_0
+234: putstatic 0
+237: getstatic 0
+240: const 10
+245: jge 46 (=291)
+248: getstatic 0
+251: const_3
+252: jne 16 (=268)
+255: getstatic 0
+258: dup
+259: const_1
+260: add
+261: putstatic 0
+264: pop
+265: jmp -28 (=237)
+268: getstatic 0
+271: const_4
+272: jne 6 (=278)
+275: jmp 16 (=291)
+278: getstatic 0
+281: const_1
+282: call -262 (=20)
+285: putstatic 0
+288: jmp -51 (=237)
+291: getstatic 0
+294: const_3
+295: jne 16 (=311)
+298: call -251 (=47)
+301: const_0
+302: jeq 9 (=311)
+305: const_4
+306: const_1
+307: print
+308: jmp 7 (=315)
+311: const_4
+312: neg
+313: const_1
+314: print
+315: getstatic 2
+318: const_0
+319: aload
+320: read
+321: getstatic 2
+324: const_1
+325: aload
+326: read
+327: getstatic 2
+330: const_2
+331: aload
+332: read
+333: const 10
+338: const_1
+339: bprint
+340: getstatic 2
+343: const_0
+344: aload
 345: getstatic 2
-348: const_2
+348: const_1
 349: aload
 350: call -338 (=12)
-353: const_1
-354: print
-355: const_0
-356: putstatic 0
-359: getstatic 0
-362: getstatic 2
-365: arraylength
-366: jge 21 (=387)
-369: getstatic 0
-372: const_1
-373: print
-374: getstatic 0
-377: dup
-378: const_1
-379: add
-380: putstatic 0
-383: pop
-384: jmp -25 (=359)
-387: const_0
-388: const_1
-389: bprint
-390: getstatic 2
-393: const_2
-394: aload
-395: const_2
-396: call -376 (=20)
-399: const_1
-400: print
-401: call -354 (=47)
-404: const_0
-405: jeq 11 (=416)
-408: const 116
-413: jmp 8 (=421)
-416: const 102
-421: const_1
-422: bprint
-423: const_0
-424: putstatic 0
-427: getstatic 0
-430: const 10
-435: jge 109 (=544)
-438: getstatic 0
-441: const_1
-442: add
-443: dup
-444: const_1
-445: jeq 39 (=484)
-448: dup
-449: const_3
-450: jeq 40 (=490)
-453: dup
-454: const_2
-455: jeq 38 (=493)
-458: dup
-459: const_5
-460: jeq 39 (=499)
-463: dup
-464: const 6
-469: jeq 44 (=513)
-472: dup
-473: const 9
-478: jeq 42 (=520)
-481: jmp 46 (=527)
-484: const_1
-485: const_1
-486: print
-487: jmp 40 (=527)
-490: const_3
-491: const_1
-492: print
-493: const_2
-494: const_1
-495: print
-496: jmp 31 (=527)
-499: const_5
-500: const_1
-501: print
-502: getstatic 0
+353: getstatic 2
+356: const_2
+357: aload
+358: call -346 (=12)
+361: const_1
+362: print
+363: const_0
+364: putstatic 0
+367: getstatic 0
+370: getstatic 2
+373: arraylength
+374: jge 21 (=395)
+377: getstatic 0
+380: const_1
+381: print
+382: getstatic 0
+385: dup
+386: const_1
+387: add
+388: putstatic 0
+391: pop
+392: jmp -25 (=367)
+395: const 10
+400: const_1
+401: bprint
+402: getstatic 2
+405: const_2
+406: aload
+407: const_2
+408: call -388 (=20)
+411: const_1
+412: print
+413: call -366 (=47)
+416: const_0
+417: jeq 11 (=428)
+420: const 116
+425: jmp 8 (=433)
+428: const 102
+433: const_1
+434: bprint
+435: const_0
+436: putstatic 0
+439: getstatic 0
+442: const 10
+447: jge 113 (=560)
+450: getstatic 0
+453: const_1
+454: add
+455: dup
+456: const_1
+457: jeq 39 (=496)
+460: dup
+461: const_3
+462: jeq 40 (=502)
+465: dup
+466: const_2
+467: jeq 38 (=505)
+470: dup
+471: const_5
+472: jeq 39 (=511)
+475: dup
+476: const 6
+481: jeq 44 (=525)
+484: dup
+485: const 9
+490: jeq 42 (=532)
+493: jmp 46 (=539)
+496: const_1
+497: const_1
+498: print
+499: jmp 40 (=539)
+502: const_3
+503: const_1
+504: print
 505: const_2
-506: add
-507: putstatic 0
-510: jmp 21 (=531)
-513: const 6
-518: const_1
-519: print
-520: const 9
-525: const_1
-526: print
-527: pop
-528: const_0
-529: const_1
-530: bprint
-531: getstatic 0
-534: dup
-535: const_1
-536: add
-537: putstatic 0
-540: pop
-541: jmp -114 (=427)
-544: exit
-545: return
+506: const_1
+507: print
+508: jmp 31 (=539)
+511: const_5
+512: const_1
+513: print
+514: getstatic 0
+517: const_2
+518: add
+519: putstatic 0
+522: jmp 25 (=547)
+525: const 6
+530: const_1
+531: print
+532: const 9
+537: const_1
+538: print
+539: pop
+540: const 10
+545: const_1
+546: bprint
+547: getstatic 0
+550: dup
+551: const_1
+552: add
+553: putstatic 0
+556: pop
+557: jmp -118 (=439)
+560: exit
+561: return
 
 Process finished with exit code 0

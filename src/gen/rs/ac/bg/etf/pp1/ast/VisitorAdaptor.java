@@ -1,6 +1,6 @@
 // generated with ast extension for cup
 // version 0.8
-// 3/2/2026 16:57:9
+// 8/2/2026 1:48:26
 
 
 package rs.ac.bg.etf.pp1.ast;
@@ -262,7 +262,6 @@ public abstract class VisitorAdaptor implements Visitor {
     public void visit(MJVariableDeclarator MJVariableDeclarator) { visit(); }
     public void visit(MJFieldDeclaration MJFieldDeclaration) { visit(); }
     public void visit(MJMemberDeclarationError MJMemberDeclarationError) { visit(); }
-    public void visit(MJAbstractMethodDeclaration MJAbstractMethodDeclaration) { visit(); }
     public void visit(MJClassFieldDeclaration MJClassFieldDeclaration) { visit(); }
     public void visit(MJNextFieldDeclaration MJNextFieldDeclaration) { visit(); }
     public void visit(MJMemberDeclaration MJMemberDeclaration) { visit(); }
