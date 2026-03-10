@@ -5,8 +5,7 @@ import rs.etf.pp1.symboltable.concepts.Scope;
 import rs.etf.pp1.symboltable.concepts.Struct;
 
 import java.lang.annotation.ElementType;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public abstract class Type extends Struct {
     protected Symbol owner;
@@ -213,10 +212,18 @@ public abstract class Type extends Struct {
         }
 
         public List<Symbol.MethodSymbol> getMethods() {
-            return getClassMembers().stream()
+            HashMap<String, Symbol.MethodSymbol> methods = new LinkedHashMap<>();
+
+            if (getSuperType() != null) {
+                getSuperType().getMethods().forEach(m -> methods.put(m.getName(), m));
+            }
+
+            getClassMembers().stream()
                     .filter(Symbol::isCallable)
                     .map(symbol -> (Symbol.MethodSymbol) symbol)
-                    .collect(java.util.stream.Collectors.toList());
+                    .forEach(m -> methods.put(m.getName(), m));
+
+            return new ArrayList<>(methods.values());
         }
 
         public int getSize() { return size; }

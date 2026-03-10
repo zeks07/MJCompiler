@@ -1,6 +1,7 @@
-C:\Users\zeljk\.jdks\temurin-1.8.0_482\bin\java.exe "-javaagent:C:\Users\zeljk\AppData\Local\Programs\IntelliJ IDEA Ultimate\lib\idea_rt.jar=65112" -Dfile.encoding=UTF-8 -classpath C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\charsets.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\access-bridge-64.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\cldrdata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\dnsns.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\jaccess.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\localedata.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\nashorn.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunec.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunjce_provider.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunmscapi.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\sunpkcs11.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\ext\zipfs.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jce.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jfr.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\jsse.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\management-agent.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\resources.jar;C:\Users\zeljk\.jdks\temurin-1.8.0_482\jre\lib\rt.jar;C:\Users\zeljk\Projects\2026\MJCompiler\out\production\MJCompiler;C:\Users\zeljk\Projects\2026\MJCompiler\lib\cup_v10k.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\JFlex.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\zeljk\Projects\2026\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
-codeSize=2939
-dataSize=191
+"C:\Program Files\Java\jdk-23\bin\java.exe" "-javaagent:C:\Users\oz200660d\AppData\Local\Programs\IntelliJ IDEA\lib\idea_rt.jar=61219" -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath C:\Users\oz200660d\Projects\MJCompiler\out\production\MJCompiler;C:\Users\oz200660d\Projects\MJCompiler\lib\cup_v10k.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\JFlex.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\mj-runtime-1.1.jar;C:\Users\oz200660d\Projects\MJCompiler\lib\symboltable-1-1.jar rs.ac.bg.etf.pp1.Compiler src/tests/testData/test.mj
+[0.491s][error][attach] failure (232) writing result of operation jcmd to pipe \\.\pipe\javatool1559152937
+codeSize=3763
+dataSize=299
 mainPC=487
 0: enter 1 1
 3: load_0
@@ -10,30 +11,30 @@ mainPC=487
 9: load_0
 10: exit
 11: return
-12: enter 2 2
-15: load_0
-16: load_1
-17: putfield 1
-20: exit
-21: return
-22: enter 1 1
-25: load_0
-26: read
-27: putfield 1
-30: exit
-31: return
-32: enter 1 1
-35: const_0
-36: exit
-37: return
-38: enter 1 1
-41: load_0
-42: load_0
-43: getfield 0
-46: invokevirtual zapremina
+12: enter 1 1
+15: const_0
+16: exit
+17: return
+18: enter 1 1
+21: load_0
+22: load_0
+23: getfield 0
+26: invokevirtual zapremina
+67: load_0
+68: getfield 1
+71: mul
+72: exit
+73: return
+74: enter 2 2
+77: load_0
+78: load_1
+79: putfield 1
+82: exit
+83: return
+84: enter 1 1
 87: load_0
-88: getfield 1
-91: mul
+88: read
+89: putfield 1
 92: exit
 93: return
 94: enter 2 2
@@ -52,72 +53,72 @@ mainPC=487
 117: getfield 1
 120: exit
 121: return
-122: enter 2 2
-125: load_0
-126: load_1
-127: putfield 1
-130: load_0
-131: const 115
-136: putfield 2
-139: exit
-140: return
-141: enter 2 2
-144: load_0
-145: load_1
-146: putfield 3
-149: load_0
-150: const 115
-155: load_0
-156: getfield 0
-159: invokevirtual postaviVrstu
-212: exit
-213: return
-214: enter 1 2
-217: const_4
-218: store_1
-219: load_1
-220: load_0
-221: getfield 3
-224: const_3
-225: div
-226: mul
+122: enter 1 2
+125: const_4
+126: store_1
+127: load_1
+128: load_0
+129: getfield 3
+132: const_3
+133: div
+134: mul
+135: exit
+136: return
+137: enter 2 2
+140: load_0
+141: load_1
+142: putfield 1
+145: load_0
+146: const 115
+151: putfield 2
+154: exit
+155: return
+156: enter 2 2
+159: load_0
+160: load_1
+161: putfield 3
+164: load_0
+165: const 115
+170: load_0
+171: getfield 0
+174: invokevirtual postaviVrstu
 227: exit
 228: return
-229: enter 2 2
+229: enter 1 2
 232: load_0
-233: load_1
-234: putfield 1
-237: load_0
-238: const 107
-243: putfield 2
-246: exit
-247: return
-248: enter 4 4
-251: load_0
-252: load_1
-253: putfield 3
-256: load_0
-257: load_2
-258: putfield 4
-261: load_0
-262: load_3
-263: putfield 5
-266: load_0
-267: const 107
-272: putfield 2
-275: exit
-276: return
-277: enter 1 2
-280: load_0
-281: getfield 3
-284: load_0
-285: getfield 4
-288: mul
-289: load_0
-290: getfield 5
-293: mul
-294: store_1
-295: load_1
+233: getfield 3
+236: load_0
+237: getfield 4
+240: mul
+241: load_0
+242: getfield 5
+245: mul
+246: store_1
+247: load_1
+248: exit
+249: return
+250: enter 2 2
+253: load_0
+254: load_1
+255: putfield 1
+258: load_0
+259: const 107
+264: putfield 2
+267: exit
+268: return
+269: enter 4 4
+272: load_0
+273: load_1
+274: putfield 3
+277: load_0
+278: load_2
+279: putfield 4
+282: load_0
+283: load_3
+284: putfield 5
+287: load_0
+288: const 107
+293: putfield 2
 296: exit
 297: return
 298: enter 1 1
@@ -182,91 +183,91 @@ mainPC=487
 591: putstatic 17
 594: const -2
 599: putstatic 18
-602: const 112
+602: const 122
 607: putstatic 19
-610: const 111
+610: const 97
 615: putstatic 20
-618: const 115
+618: const 112
 623: putstatic 21
-626: const 116
+626: const 114
 631: putstatic 22
-634: const 97
+634: const 101
 639: putstatic 23
-642: const 118
+642: const 109
 647: putstatic 24
 650: const 105
 655: putstatic 25
-658: const 84
+658: const 110
 663: putstatic 26
-666: const 101
+666: const 97
 671: putstatic 27
-674: const 122
-679: putstatic 28
-682: const 105
-687: putstatic 29
-690: const 110
-695: putstatic 30
-698: const 117
-703: putstatic 31
-706: const_m1
-707: putstatic 32
-710: const 12
-715: putstatic 33
-718: const 117
-723: putstatic 34
-726: const 99
-731: putstatic 35
-734: const 105
-739: putstatic 36
-742: const 116
-747: putstatic 37
-750: const 97
-755: putstatic 38
-758: const 106
-763: putstatic 39
-766: const 84
-771: putstatic 40
-774: const 101
-779: putstatic 41
-782: const 122
-787: putstatic 42
-790: const 105
-795: putstatic 43
-798: const 110
-803: putstatic 44
-806: const 117
-811: putstatic 45
-814: const_m1
-815: putstatic 46
-818: const 22
-823: putstatic 47
-826: const 122
-831: putstatic 48
-834: const 97
-839: putstatic 49
-842: const 112
-847: putstatic 50
-850: const 114
-855: putstatic 51
-858: const 101
-863: putstatic 52
-866: const 109
-871: putstatic 53
-874: const 105
-879: putstatic 54
-882: const 110
-887: putstatic 55
-890: const 97
-895: putstatic 56
-898: const_m1
+674: const_m1
+675: putstatic 28
+678: const 12
+683: putstatic 29
+686: const 81
+691: putstatic 30
+694: const_m1
+695: putstatic 31
+698: const 18
+703: putstatic 32
+706: const 112
+711: putstatic 33
+714: const 111
+719: putstatic 34
+722: const 115
+727: putstatic 35
+730: const 116
+735: putstatic 36
+738: const 97
+743: putstatic 37
+746: const 118
+751: putstatic 38
+754: const 105
+759: putstatic 39
+762: const 84
+767: putstatic 40
+770: const 101
+775: putstatic 41
+778: const 122
+783: putstatic 42
+786: const 105
+791: putstatic 43
+794: const 110
+799: putstatic 44
+802: const 117
+807: putstatic 45
+810: const_m1
+811: putstatic 46
+814: const 74
+819: putstatic 47
+822: const 117
+827: putstatic 48
+830: const 99
+835: putstatic 49
+838: const 105
+843: putstatic 50
+846: const 116
+851: putstatic 51
+854: const 97
+859: putstatic 52
+862: const 106
+867: putstatic 53
+870: const 84
+875: putstatic 54
+878: const 101
+883: putstatic 55
+886: const 122
+891: putstatic 56
+894: const 105
 899: putstatic 57
-902: const 32
+902: const 110
 907: putstatic 58
-910: const 81
+910: const 117
 915: putstatic 59
 918: const_m1
 919: putstatic 60
-922: const 38
+922: const 84
 927: putstatic 61
 930: const 112
 935: putstatic 62
@@ -344,448 +345,664 @@ mainPC=487
 1211: putstatic 98
 1214: const -2
 1219: putstatic 99
-1222: const 112
+1222: const 122
 1227: putstatic 100
-1230: const 111
+1230: const 97
 1235: putstatic 101
-1238: const 115
+1238: const 112
 1243: putstatic 102
-1246: const 116
+1246: const 114
 1251: putstatic 103
-1254: const 97
+1254: const 101
 1259: putstatic 104
-1262: const 118
+1262: const 109
 1267: putstatic 105
 1270: const 105
 1275: putstatic 106
-1278: const 84
+1278: const 110
 1283: putstatic 107
-1286: const 101
+1286: const 97
 1291: putstatic 108
-1294: const 122
-1299: putstatic 109
-1302: const 105
-1307: putstatic 110
-1310: const 110
-1315: putstatic 111
-1318: const 117
-1323: putstatic 112
-1326: const_m1
-1327: putstatic 113
-1330: const 122
-1335: putstatic 114
-1338: const 112
-1343: putstatic 115
-1346: const 111
-1351: putstatic 116
-1354: const 115
-1359: putstatic 117
-1362: const 116
-1367: putstatic 118
-1370: const 97
-1375: putstatic 119
-1378: const 118
-1383: putstatic 120
-1386: const 105
-1391: putstatic 121
-1394: const 80
-1399: putstatic 122
-1402: const 111
-1407: putstatic 123
-1410: const 108
-1415: putstatic 124
-1418: const 117
-1423: putstatic 125
-1426: const 112
-1431: putstatic 126
-1434: const 114
-1439: putstatic 127
-1442: const 101
-1447: putstatic 128
+1294: const_m1
+1295: putstatic 109
+1298: const 122
+1303: putstatic 110
+1306: const 81
+1311: putstatic 111
+1314: const_m1
+1315: putstatic 112
+1318: const 18
+1323: putstatic 113
+1326: const 112
+1331: putstatic 114
+1334: const 111
+1339: putstatic 115
+1342: const 115
+1347: putstatic 116
+1350: const 116
+1355: putstatic 117
+1358: const 97
+1363: putstatic 118
+1366: const 118
+1371: putstatic 119
+1374: const 105
+1379: putstatic 120
+1382: const 84
+1387: putstatic 121
+1390: const 101
+1395: putstatic 122
+1398: const 122
+1403: putstatic 123
+1406: const 105
+1411: putstatic 124
+1414: const 110
+1419: putstatic 125
+1422: const 117
+1427: putstatic 126
+1430: const_m1
+1431: putstatic 127
+1434: const 137
+1439: putstatic 128
+1442: const 117
+1447: putstatic 129
 1450: const 99
-1455: putstatic 129
-1458: const 110
-1463: putstatic 130
-1466: const 105
-1471: putstatic 131
-1474: const 107
-1479: putstatic 132
-1482: const_m1
-1483: putstatic 133
-1486: const 141
-1491: putstatic 134
-1494: const 122
-1499: putstatic 135
-1502: const 97
-1507: putstatic 136
-1510: const 112
-1515: putstatic 137
-1518: const 114
-1523: putstatic 138
-1526: const 101
-1531: putstatic 139
-1534: const 109
-1539: putstatic 140
-1542: const 105
-1547: putstatic 141
-1550: const 110
-1555: putstatic 142
-1558: const 97
-1563: putstatic 143
-1566: const_m1
-1567: putstatic 144
-1570: const 214
-1575: putstatic 145
-1578: const -2
-1583: putstatic 146
-1586: const 112
-1591: putstatic 147
-1594: const 111
-1599: putstatic 148
-1602: const 115
-1607: putstatic 149
-1610: const 116
-1615: putstatic 150
-1618: const 97
-1623: putstatic 151
-1626: const 118
-1631: putstatic 152
-1634: const 105
-1639: putstatic 153
-1642: const 84
-1647: putstatic 154
-1650: const 101
-1655: putstatic 155
-1658: const 122
-1663: putstatic 156
-1666: const 105
-1671: putstatic 157
-1674: const 110
-1679: putstatic 158
-1682: const 117
-1687: putstatic 159
-1690: const_m1
-1691: putstatic 160
-1694: const 229
-1699: putstatic 161
-1702: const 112
-1707: putstatic 162
-1710: const 111
-1715: putstatic 163
-1718: const 115
-1723: putstatic 164
-1726: const 116
-1731: putstatic 165
-1734: const 97
-1739: putstatic 166
-1742: const 118
-1747: putstatic 167
-1750: const 105
-1755: putstatic 168
-1758: const 83
-1763: putstatic 169
-1766: const 116
-1771: putstatic 170
-1774: const 114
-1779: putstatic 171
-1782: const 97
-1787: putstatic 172
-1790: const 110
-1795: putstatic 173
+1455: putstatic 130
+1458: const 105
+1463: putstatic 131
+1466: const 116
+1471: putstatic 132
+1474: const 97
+1479: putstatic 133
+1482: const 106
+1487: putstatic 134
+1490: const 84
+1495: putstatic 135
+1498: const 101
+1503: putstatic 136
+1506: const 122
+1511: putstatic 137
+1514: const 105
+1519: putstatic 138
+1522: const 110
+1527: putstatic 139
+1530: const 117
+1535: putstatic 140
+1538: const_m1
+1539: putstatic 141
+1542: const 84
+1547: putstatic 142
+1550: const 112
+1555: putstatic 143
+1558: const 111
+1563: putstatic 144
+1566: const 115
+1571: putstatic 145
+1574: const 116
+1579: putstatic 146
+1582: const 97
+1587: putstatic 147
+1590: const 118
+1595: putstatic 148
+1598: const 105
+1603: putstatic 149
+1606: const 86
+1611: putstatic 150
+1614: const 114
+1619: putstatic 151
+1622: const 115
+1627: putstatic 152
+1630: const 116
+1635: putstatic 153
+1638: const 117
+1643: putstatic 154
+1646: const_m1
+1647: putstatic 155
+1650: const 94
+1655: putstatic 156
+1658: const 100
+1663: putstatic 157
+1666: const 111
+1671: putstatic 158
+1674: const 104
+1679: putstatic 159
+1682: const 118
+1687: putstatic 160
+1690: const 86
+1695: putstatic 161
+1698: const 114
+1703: putstatic 162
+1706: const 115
+1711: putstatic 163
+1714: const 116
+1719: putstatic 164
+1722: const 117
+1727: putstatic 165
+1730: const_m1
+1731: putstatic 166
+1734: const 104
+1739: putstatic 167
+1742: const 100
+1747: putstatic 168
+1750: const 111
+1755: putstatic 169
+1758: const 104
+1763: putstatic 170
+1766: const 118
+1771: putstatic 171
+1774: const 84
+1779: putstatic 172
+1782: const 101
+1787: putstatic 173
+1790: const 122
+1795: putstatic 174
 1798: const 105
-1803: putstatic 174
-1806: const 99
-1811: putstatic 175
-1814: const 101
-1819: putstatic 176
+1803: putstatic 175
+1806: const 110
+1811: putstatic 176
+1814: const 117
+1819: putstatic 177
 1822: const_m1
-1823: putstatic 177
-1826: const 248
-1831: putstatic 178
-1834: const 122
-1839: putstatic 179
-1842: const 97
-1847: putstatic 180
-1850: const 112
-1855: putstatic 181
-1858: const 114
-1863: putstatic 182
-1866: const 101
-1871: putstatic 183
-1874: const 109
-1879: putstatic 184
+1823: putstatic 178
+1826: const 113
+1831: putstatic 179
+1834: const 112
+1839: putstatic 180
+1842: const 111
+1847: putstatic 181
+1850: const 115
+1855: putstatic 182
+1858: const 116
+1863: putstatic 183
+1866: const 97
+1871: putstatic 184
+1874: const 118
+1879: putstatic 185
 1882: const 105
-1887: putstatic 185
-1890: const 110
-1895: putstatic 186
-1898: const 97
-1903: putstatic 187
-1906: const_m1
-1907: putstatic 188
-1910: const 277
-1915: putstatic 189
-1918: const -2
-1923: putstatic 190
-1926: const 6
-1931: newarray 1
-1933: store_0
-1934: const 6
-1939: newarray 1
-1941: store_1
-1942: new 16
-1945: dup
-1946: const 100
-1951: putfield 0
-1954: store_3
-1955: new 16
-1958: dup
-1959: const 100
-1964: putfield 0
-1967: store 4
-1969: new 16
-1972: dup
-1973: const 100
-1978: putfield 0
-1981: store 5
-1983: new 24
-1986: dup
-1987: const 147
-1992: putfield 0
-1995: store 6
-1997: new 24
-2000: dup
-2001: const 147
-2006: putfield 0
-2009: store 7
-2011: new 24
-2014: dup
-2015: const 147
-2020: putfield 0
-2023: store 8
-2025: load_3
-2026: const_1
-2027: load_3
-2028: getfield 0
-2031: invokevirtual postaviPoluprecnik
-2108: load 4
-2110: const_2
-2111: load 4
-2113: getfield 0
-2116: invokevirtual postaviPoluprecnik
-2193: load 5
-2195: const_3
-2196: load 5
-2198: getfield 0
-2201: invokevirtual postaviPoluprecnik
-2278: load 6
-2280: const_1
-2281: const_2
-2282: const_3
-2283: load 6
-2285: getfield 0
-2288: invokevirtual postaviStranice
-2353: load 7
-2355: const_2
-2356: const_3
-2357: const_4
-2358: load 7
-2360: getfield 0
-2363: invokevirtual postaviStranice
-2428: load 8
-2430: const_3
-2431: const_4
-2432: const_5
-2433: load 8
-2435: getfield 0
-2438: invokevirtual postaviStranice
-2503: load_0
-2504: const_0
-2505: load_3
-2506: astore
-2507: load_0
-2508: const_2
-2509: load 4
-2511: astore
-2512: load_0
-2513: const_4
-2514: load 5
-2516: astore
-2517: load_0
-2518: const_1
-2519: load 6
-2521: astore
-2522: load_0
-2523: const_3
-2524: load 7
-2526: astore
-2527: load_0
-2528: const_5
-2529: load 8
-2531: astore
-2532: read
-2533: store 9
-2535: const_0
-2536: store_2
-2537: load_2
-2538: load_1
-2539: arraylength
-2540: jge 85 (=2625)
-2543: load_0
-2544: load_2
-2545: aload
-2546: load_0
-2547: load_2
-2548: aload
-2549: load 9
-2551: getfield 0
-2554: invokevirtual postaviTezinu
-2611: load_1
-2612: load_2
-2613: load_0
-2614: load_2
-2615: aload
-2616: astore
-2617: load_2
-2618: inc 2,1
-2621: pop
-2622: jmp -85 (=2537)
-2625: const_0
-2626: putstatic 1
-2629: const_0
-2630: putstatic 3
-2633: const_1
-2634: store_2
-2635: load_2
-2636: load_1
-2637: arraylength
-2638: jgt 119 (=2757)
-2641: load_2
-2642: const_2
-2643: rem
-2644: const_0
-2645: jne 6 (=2651)
-2648: jmp 101 (=2749)
-2651: getstatic 1
-2654: load_1
-2655: load_2
-2656: const_1
-2657: sub
-2658: aload
-2659: load_1
-2660: load_2
-2661: const_1
-2662: sub
-2663: aload
-2664: getfield 0
-2667: invokevirtual zapremina
-2708: add
-2709: putstatic 1
-2712: getstatic 3
-2715: load_1
-2716: load_2
-2717: const_1
-2718: sub
-2719: aload
-2720: load_1
-2721: load_2
-2722: const_1
-2723: sub
-2724: aload
-2725: getfield 0
-2728: invokevirtual Q
-2737: add
-2738: putstatic 3
-2741: load_0
-2742: load_2
-2743: const_1
-2744: sub
-2745: aload
-2746: call -2448 (=298)
-2749: load_2
-2750: inc 2,1
-2753: pop
-2754: jmp -119 (=2635)
-2757: const_0
-2758: putstatic 0
-2761: const_0
-2762: putstatic 2
-2765: const_1
-2766: store_2
-2767: load_2
-2768: load_1
-2769: arraylength
-2770: jgt 119 (=2889)
-2773: load_2
-2774: const_2
-2775: rem
-2776: const_1
-2777: jne 6 (=2783)
-2780: jmp 101 (=2881)
-2783: getstatic 0
-2786: load_0
-2787: load_2
-2788: const_1
-2789: sub
-2790: aload
-2791: load_0
-2792: load_2
-2793: const_1
-2794: sub
-2795: aload
-2796: getfield 0
-2799: invokevirtual zapremina
-2840: add
-2841: putstatic 0
-2844: getstatic 2
-2847: load_0
-2848: load_2
-2849: const_1
-2850: sub
-2851: aload
-2852: load_0
-2853: load_2
-2854: const_1
-2855: sub
-2856: aload
-2857: getfield 0
-2860: invokevirtual Q
-2869: add
-2870: putstatic 2
-2873: load_0
-2874: load_2
-2875: const_1
-2876: sub
-2877: aload
-2878: call -2580 (=298)
-2881: load_2
-2882: inc 2,1
-2885: pop
-2886: jmp -119 (=2767)
-2889: getstatic 1
-2892: const_1
-2893: print
-2894: const 10
-2899: const_1
-2900: bprint
-2901: getstatic 0
-2904: const_1
-2905: print
-2906: const 10
-2911: const_1
-2912: bprint
-2913: getstatic 3
-2916: const_1
-2917: print
-2918: const 10
-2923: const_1
-2924: bprint
-2925: getstatic 2
-2928: const_1
-2929: print
-2930: const 10
-2935: const_1
-2936: bprint
-2937: exit
-2938: return
+1887: putstatic 186
+1890: const 80
+1895: putstatic 187
+1898: const 111
+1903: putstatic 188
+1906: const 108
+1911: putstatic 189
+1914: const 117
+1919: putstatic 190
+1922: const 112
+1927: putstatic 191
+1930: const 114
+1935: putstatic 192
+1938: const 101
+1943: putstatic 193
+1946: const 99
+1951: putstatic 194
+1954: const 110
+1959: putstatic 195
+1962: const 105
+1967: putstatic 196
+1970: const 107
+1975: putstatic 197
+1978: const_m1
+1979: putstatic 198
+1982: const 156
+1987: putstatic 199
+1990: const -2
+1995: putstatic 200
+1998: const 122
+2003: putstatic 201
+2006: const 97
+2011: putstatic 202
+2014: const 112
+2019: putstatic 203
+2022: const 114
+2027: putstatic 204
+2030: const 101
+2035: putstatic 205
+2038: const 109
+2043: putstatic 206
+2046: const 105
+2051: putstatic 207
+2054: const 110
+2059: putstatic 208
+2062: const 97
+2067: putstatic 209
+2070: const_m1
+2071: putstatic 210
+2074: const 229
+2079: putstatic 211
+2082: const 81
+2087: putstatic 212
+2090: const_m1
+2091: putstatic 213
+2094: const 18
+2099: putstatic 214
+2102: const 112
+2107: putstatic 215
+2110: const 111
+2115: putstatic 216
+2118: const 115
+2123: putstatic 217
+2126: const 116
+2131: putstatic 218
+2134: const 97
+2139: putstatic 219
+2142: const 118
+2147: putstatic 220
+2150: const 105
+2155: putstatic 221
+2158: const 84
+2163: putstatic 222
+2166: const 101
+2171: putstatic 223
+2174: const 122
+2179: putstatic 224
+2182: const 105
+2187: putstatic 225
+2190: const 110
+2195: putstatic 226
+2198: const 117
+2203: putstatic 227
+2206: const_m1
+2207: putstatic 228
+2210: const 250
+2215: putstatic 229
+2218: const 117
+2223: putstatic 230
+2226: const 99
+2231: putstatic 231
+2234: const 105
+2239: putstatic 232
+2242: const 116
+2247: putstatic 233
+2250: const 97
+2255: putstatic 234
+2258: const 106
+2263: putstatic 235
+2266: const 84
+2271: putstatic 236
+2274: const 101
+2279: putstatic 237
+2282: const 122
+2287: putstatic 238
+2290: const 105
+2295: putstatic 239
+2298: const 110
+2303: putstatic 240
+2306: const 117
+2311: putstatic 241
+2314: const_m1
+2315: putstatic 242
+2318: const 84
+2323: putstatic 243
+2326: const 112
+2331: putstatic 244
+2334: const 111
+2339: putstatic 245
+2342: const 115
+2347: putstatic 246
+2350: const 116
+2355: putstatic 247
+2358: const 97
+2363: putstatic 248
+2366: const 118
+2371: putstatic 249
+2374: const 105
+2379: putstatic 250
+2382: const 86
+2387: putstatic 251
+2390: const 114
+2395: putstatic 252
+2398: const 115
+2403: putstatic 253
+2406: const 116
+2411: putstatic 254
+2414: const 117
+2419: putstatic 255
+2422: const_m1
+2423: putstatic 256
+2426: const 94
+2431: putstatic 257
+2434: const 100
+2439: putstatic 258
+2442: const 111
+2447: putstatic 259
+2450: const 104
+2455: putstatic 260
+2458: const 118
+2463: putstatic 261
+2466: const 86
+2471: putstatic 262
+2474: const 114
+2479: putstatic 263
+2482: const 115
+2487: putstatic 264
+2490: const 116
+2495: putstatic 265
+2498: const 117
+2503: putstatic 266
+2506: const_m1
+2507: putstatic 267
+2510: const 104
+2515: putstatic 268
+2518: const 100
+2523: putstatic 269
+2526: const 111
+2531: putstatic 270
+2534: const 104
+2539: putstatic 271
+2542: const 118
+2547: putstatic 272
+2550: const 84
+2555: putstatic 273
+2558: const 101
+2563: putstatic 274
+2566: const 122
+2571: putstatic 275
+2574: const 105
+2579: putstatic 276
+2582: const 110
+2587: putstatic 277
+2590: const 117
+2595: putstatic 278
+2598: const_m1
+2599: putstatic 279
+2602: const 113
+2607: putstatic 280
+2610: const 112
+2615: putstatic 281
+2618: const 111
+2623: putstatic 282
+2626: const 115
+2631: putstatic 283
+2634: const 116
+2639: putstatic 284
+2642: const 97
+2647: putstatic 285
+2650: const 118
+2655: putstatic 286
+2658: const 105
+2663: putstatic 287
+2666: const 83
+2671: putstatic 288
+2674: const 116
+2679: putstatic 289
+2682: const 114
+2687: putstatic 290
+2690: const 97
+2695: putstatic 291
+2698: const 110
+2703: putstatic 292
+2706: const 105
+2711: putstatic 293
+2714: const 99
+2719: putstatic 294
+2722: const 101
+2727: putstatic 295
+2730: const_m1
+2731: putstatic 296
+2734: const 269
+2739: putstatic 297
+2742: const -2
+2747: putstatic 298
+2750: const 6
+2755: newarray 1
+2757: store_0
+2758: const 6
+2763: newarray 1
+2765: store_1
+2766: new 16
+2769: dup
+2770: const 100
+2775: putfield 0
+2778: store_3
+2779: new 16
+2782: dup
+2783: const 100
+2788: putfield 0
+2791: store 4
+2793: new 16
+2796: dup
+2797: const 100
+2802: putfield 0
+2805: store 5
+2807: new 24
+2810: dup
+2811: const 201
+2816: putfield 0
+2819: store 6
+2821: new 24
+2824: dup
+2825: const 201
+2830: putfield 0
+2833: store 7
+2835: new 24
+2838: dup
+2839: const 201
+2844: putfield 0
+2847: store 8
+2849: load_3
+2850: const_1
+2851: load_3
+2852: getfield 0
+2855: invokevirtual postaviPoluprecnik
+2932: load 4
+2934: const_2
+2935: load 4
+2937: getfield 0
+2940: invokevirtual postaviPoluprecnik
+3017: load 5
+3019: const_3
+3020: load 5
+3022: getfield 0
+3025: invokevirtual postaviPoluprecnik
+3102: load 6
+3104: const_1
+3105: const_2
+3106: const_3
+3107: load 6
+3109: getfield 0
+3112: invokevirtual postaviStranice
+3177: load 7
+3179: const_2
+3180: const_3
+3181: const_4
+3182: load 7
+3184: getfield 0
+3187: invokevirtual postaviStranice
+3252: load 8
+3254: const_3
+3255: const_4
+3256: const_5
+3257: load 8
+3259: getfield 0
+3262: invokevirtual postaviStranice
+3327: load_0
+3328: const_0
+3329: load_3
+3330: astore
+3331: load_0
+3332: const_2
+3333: load 4
+3335: astore
+3336: load_0
+3337: const_4
+3338: load 5
+3340: astore
+3341: load_0
+3342: const_1
+3343: load 6
+3345: astore
+3346: load_0
+3347: const_3
+3348: load 7
+3350: astore
+3351: load_0
+3352: const_5
+3353: load 8
+3355: astore
+3356: read
+3357: store 9
+3359: const_0
+3360: store_2
+3361: load_2
+3362: load_1
+3363: arraylength
+3364: jge 85 (=3449)
+3367: load_0
+3368: load_2
+3369: aload
+3370: load 9
+3372: load_0
+3373: load_2
+3374: aload
+3375: getfield 0
+3378: invokevirtual postaviTezinu
+3435: load_1
+3436: load_2
+3437: load_0
+3438: load_2
+3439: aload
+3440: astore
+3441: load_2
+3442: inc 2,1
+3445: pop
+3446: jmp -85 (=3361)
+3449: const_0
+3450: putstatic 1
+3453: const_0
+3454: putstatic 3
+3457: const_1
+3458: store_2
+3459: load_2
+3460: load_1
+3461: arraylength
+3462: jgt 119 (=3581)
+3465: load_2
+3466: const_2
+3467: rem
+3468: const_0
+3469: jne 6 (=3475)
+3472: jmp 101 (=3573)
+3475: getstatic 1
+3478: load_1
+3479: load_2
+3480: const_1
+3481: sub
+3482: aload
+3483: load_1
+3484: load_2
+3485: const_1
+3486: sub
+3487: aload
+3488: getfield 0
+3491: invokevirtual zapremina
+3532: add
+3533: putstatic 1
+3536: getstatic 3
+3539: load_1
+3540: load_2
+3541: const_1
+3542: sub
+3543: aload
+3544: load_1
+3545: load_2
+3546: const_1
+3547: sub
+3548: aload
+3549: getfield 0
+3552: invokevirtual Q
+3561: add
+3562: putstatic 3
+3565: load_0
+3566: load_2
+3567: const_1
+3568: sub
+3569: aload
+3570: call -3272 (=298)
+3573: load_2
+3574: inc 2,1
+3577: pop
+3578: jmp -119 (=3459)
+3581: const_0
+3582: putstatic 0
+3585: const_0
+3586: putstatic 2
+3589: const_1
+3590: store_2
+3591: load_2
+3592: load_1
+3593: arraylength
+3594: jgt 119 (=3713)
+3597: load_2
+3598: const_2
+3599: rem
+3600: const_1
+3601: jne 6 (=3607)
+3604: jmp 101 (=3705)
+3607: getstatic 0
+3610: load_0
+3611: load_2
+3612: const_1
+3613: sub
+3614: aload
+3615: load_0
+3616: load_2
+3617: const_1
+3618: sub
+3619: aload
+3620: getfield 0
+3623: invokevirtual zapremina
+3664: add
+3665: putstatic 0
+3668: getstatic 2
+3671: load_0
+3672: load_2
+3673: const_1
+3674: sub
+3675: aload
+3676: load_0
+3677: load_2
+3678: const_1
+3679: sub
+3680: aload
+3681: getfield 0
+3684: invokevirtual Q
+3693: add
+3694: putstatic 2
+3697: load_0
+3698: load_2
+3699: const_1
+3700: sub
+3701: aload
+3702: call -3404 (=298)
+3705: load_2
+3706: inc 2,1
+3709: pop
+3710: jmp -119 (=3591)
+3713: getstatic 1
+3716: const_1
+3717: print
+3718: const 10
+3723: const_1
+3724: bprint
+3725: getstatic 0
+3728: const_1
+3729: print
+3730: const 10
+3735: const_1
+3736: bprint
+3737: getstatic 3
+3740: const_1
+3741: print
+3742: const 10
+3747: const_1
+3748: bprint
+3749: getstatic 2
+3752: const_1
+3753: print
+3754: const 10
+3759: const_1
+3760: bprint
+3761: exit
+3762: return
 
 Process finished with exit code 0

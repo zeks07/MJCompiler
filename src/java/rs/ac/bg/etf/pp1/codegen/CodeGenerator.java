@@ -425,11 +425,11 @@ public final class CodeGenerator extends TreeVisitor {
     @Override
     public void visit(MJQualifiedMethodInvocation node) {
         Symbol method = node.expressionvalue.symbol;
+        generateExpression(node.getPrimary()).load();
+        generateArguments(node.getArgument_list_opt());
         if (method.isMember()) {
             generateExpression(node.getPrimary()).load();
         }
-        generateExpression(node.getPrimary()).load();
-        generateArguments(node.getArgument_list_opt());
         Item item = items.makeMemberItem(node.expressionvalue.symbol);
         result = item.invoke();
     }
