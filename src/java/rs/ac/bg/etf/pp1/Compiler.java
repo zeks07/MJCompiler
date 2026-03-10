@@ -7,11 +7,13 @@ import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.codegen.BytecodeEmitter;
 import rs.ac.bg.etf.pp1.codegen.CodeGenerator;
 import rs.ac.bg.etf.pp1.codegen.RuntimeLibrary;
+import rs.ac.bg.etf.pp1.semantic.DumpTableVisitor;
 import rs.ac.bg.etf.pp1.semantic.SemanticAnalyzer;
 import rs.ac.bg.etf.pp1.symbols.Symbol.*;
 import rs.ac.bg.etf.pp1.logger.CompilerDiagnostics;
 import rs.ac.bg.etf.pp1.logger.CompilerLogger;
 import rs.ac.bg.etf.pp1.semantic.SymbolCollector;
+import rs.ac.bg.etf.pp1.symbols.SymbolTable;
 import rs.ac.bg.etf.pp1.util.Context;
 import rs.etf.pp1.mj.runtime.disasm;
 
@@ -109,9 +111,11 @@ public final class Compiler {
 
         if (diagnostics.hasErrors()) {
             logger.renderAll(diagnostics.all());
-            return;
         }
 
-        disasm.main( new String[] { output.toString() });
+        SymbolTable table = SymbolTable.getInstance(context);
+        DumpTableVisitor dump = new DumpTableVisitor();
+        table.dump(dump);
+        System.out.println(dump.getOutput());
     }
 }

@@ -254,6 +254,9 @@ public abstract class Type extends Struct {
 
         @Override
         protected boolean xAssignable(Type other) { return other.isReference(); }
+
+        @Override
+        public String toString() { return "null"; }
     }
 
     public static final class VoidType extends Type {

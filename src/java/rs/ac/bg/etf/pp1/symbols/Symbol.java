@@ -13,7 +13,7 @@ public abstract class Symbol extends Obj implements Modifiable {
     protected Flags flags;
 
     Symbol(int legacyKind, String name, Type type) {
-        super(legacyKind, name, type);
+        super(legacyKind, name, type, 0, 1);
         this.owner = null;
     }
 
@@ -136,6 +136,7 @@ public abstract class Symbol extends Obj implements Modifiable {
         Symbol find(String name);
         Symbol getOwner();
         boolean isClass();
+        Scope getScope();
     }
 
     public static final class ProgramSymbol extends Symbol implements Writable {
@@ -144,7 +145,7 @@ public abstract class Symbol extends Obj implements Modifiable {
         private MethodSymbol main;
 
         public ProgramSymbol(String name, Scope locals) {
-            super(Obj.Prog, name, null);
+            super(Obj.Prog, name, SymbolTable.VOID);
             this.locals = locals;
             this.flags = new Flags();
         }
@@ -195,6 +196,9 @@ public abstract class Symbol extends Obj implements Modifiable {
         public void setMain(MethodSymbol main) { this.main = main; }
 
         public int getStaticFieldCount() { return dataSize; }
+
+        @Override
+        public Scope getScope() { return locals; }
     }
 
     public static final class MethodSymbol extends Symbol implements Writable {
@@ -312,6 +316,9 @@ public abstract class Symbol extends Obj implements Modifiable {
                     .map(rs.ac.bg.etf.pp1.symbols.Type::toString)
                     .collect(java.util.stream.Collectors.joining(", ", "(", ")"));
         }
+
+        @Override
+        public Scope getScope() { return locals; }
     }
 
     public static abstract class TypeSymbol extends Symbol {
@@ -376,6 +383,9 @@ public abstract class Symbol extends Obj implements Modifiable {
 
         @Override
         public String getKindName() { return "Class"; }
+
+        @Override
+        public Scope getScope() { return getThisType().scope; }
     }
 
     public static final class EnumSymbol extends TypeSymbol implements Writable {
@@ -406,6 +416,9 @@ public abstract class Symbol extends Obj implements Modifiable {
 
         @Override
         public String getKindName() { return "Enum"; }
+
+        @Override
+        public Scope getScope() { return getThisType().scope; }
     }
 
     public static final class UniverseSymbol extends Symbol implements Writable {
@@ -434,6 +447,9 @@ public abstract class Symbol extends Obj implements Modifiable {
 
         @Override
         public String getKindName() { return ""; }
+
+        @Override
+        public Scope getScope() { return universeScope; }
     }
 
     public static final class NoSymbol extends Symbol {

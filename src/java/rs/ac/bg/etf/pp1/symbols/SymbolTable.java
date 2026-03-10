@@ -179,6 +179,6 @@ public final class SymbolTable {
     public Writable currentWritable() { return currentSymbol; }
 
     public void dump(SymbolTableVisitor visitor) {
-        Tab.dump(visitor);
+        currentSymbol.getScope().accept(visitor);
     }
 }
