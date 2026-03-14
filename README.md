@@ -15,7 +15,7 @@ The compiler is built using a multiphase architecture:
 ### MicroJava language
 
 #### Data Types & Structures
-- Primitive types: `int`, `char`, `bool`.
+- Primitive types: `int`, `char`, `bool`
 - Enums
 - One dimensional arrays
 - Classes and inheritance
@@ -27,7 +27,7 @@ The compiler is built using a multiphase architecture:
 
 #### Built-in Functions
 - I/O: `print()` and `read()`
-- Utility: `len()``, `ord()` and `chr()`
+- Utility: `len()`, `ord()` and `chr()`
 
 #### Language example
 
